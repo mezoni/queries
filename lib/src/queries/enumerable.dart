@@ -443,14 +443,8 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
       var it = iterator;
       while (it.moveNext()) {
         var value = it.current;
-        var key = keySelector(value);
-        TElement element;
-        if (elementSelector != null) {
-          element = elementSelector(value);
-        } else {
-          element = value as TElement;
-        }
-
+        var key = keySelector(value);        
+        var element = elementSelector(value);
         var elements = map[key];
         if (elements == null) {
           elements = <TElement>[];
