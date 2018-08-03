@@ -743,7 +743,8 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return new _Enumerable<TResult>(generator());
   }
 
-  IEnumerable<TResult> select$1<TResult>(Func2<TSource, int, TResult> selector) {
+  IEnumerable<TResult> select$1<TResult>(
+      Func2<TSource, int, TResult> selector) {
     if (selector == null) {
       throw new ArgumentError.notNull("selector");
     }
@@ -1293,10 +1294,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
 
       if (value != null) {
         if (!first) {
-          result = func(result, value);          
+          result = func(result, value);
         } else {
           first = false;
-        }        
+        }
       }
     }
 
