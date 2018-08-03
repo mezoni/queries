@@ -871,15 +871,23 @@ void _testSelect() {
     {
       var data = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
       var expected = [0, 10, 20, 30, 40, 30, 20, 10, 0];
-      var query = data.select((e) => e * 10);
+      var query = data.select<int>((e) => e * 10);
       var result = query.asIterable();
       expect(result, expected);
     }
     //
     {
-      var data = new Collection([]);
+      var data = new Collection<int>([]);
       var expected = [];
-      var query = data.select((e) => e);
+      var query = data.select<int>((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2]);
+      var expected = <String>["00", "11", "22"];
+      var query = data.select$1<String>((e, i) => "$e$i");
       var result = query.asIterable();
       expect(result, expected);
     }

@@ -158,7 +158,7 @@ abstract class IEnumerable<TSource> {
   IEnumerable<TResult> select<TResult>(Func1<TSource, TResult> selector);
 
   /// Projects each element of a sequence into a new form.
-  IEnumerable<TResult> select2<TResult>(Func2<TSource, int, TResult> selector);
+  IEnumerable<TResult> select$1<TResult>(Func2<TSource, int, TResult> selector);
 
   /// Projects each element of a sequence to an [IEnumerable]<[TResult]> and
   /// flattens the resulting sequences into one sequence.
