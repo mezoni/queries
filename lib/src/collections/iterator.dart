@@ -1,7 +1,9 @@
 part of queries.collections;
 
+typedef bool _IteratorAction();
+
 class _Iterator<TElement> implements Iterator<TElement> {
-  Function action;
+  _IteratorAction action;
 
   TElement result;
 

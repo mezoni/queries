@@ -1,752 +1,1350 @@
 import 'package:queries/collections.dart';
 import 'package:queries/queries.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 void main() {
-  testAggregate();
-  testAll();
-  testAny();
-  testAverage();
-  testCast();
-  testConcat();
-  testContains();
-  testCount();
-  testDefaultIfEmpty();
-  testDistinct();
-  testElementAt();
-  testElementAtOrDefault();
-  testExcept();
-  testFirst();
-  testFirstOrDefault();
-  testGroupBy();
-  testGroupJoin();
-  testIntersect();
-  testJoin();
-  testLast();
-  testLastOrDefault();
-  testMax();
-  testMin();
-  testOfType();
-  testOrderBy();
-  testRange();
-  testRepeat();
-  testSelect();
-  testSelectMany();
-  testSingle();
-  testSingleOrDefault();
-  testSkip();
-  testSkipWhile();
-  testSum();
-  testTake();
-  testTakeWhile();
-  testThenBy();
-  testToCollection();
-  testToDictionary();
-  testToLookup();
-  testUnion();
-  testWhere();
+  _testAggregate();
+  _testAll();
+  _testAny();
+  _testAppend();
+  _testAverage();
+  _testCast();
+  _testConcat();
+  _testContains();
+  _testCount();
+  _testDefaultIfEmpty();
+  _testDistinct();
+  _testElementAt();
+  _testElementAtOrDefault();
+  _testExcept();
+  _testFirst();
+  _testFirstOrDefault();
+  _testGroupBy();
+  _testGroupJoin();
+  _testIntersect();
+  _testJoin();
+  _testLast();
+  _testLastOrDefault();
+  _testMax();
+  _testMin();
+  _testOfType();
+  _testOrderBy();
+  _testPrepend();
+  _testRange();
+  _testRepeat();
+  _testSelect();
+  _testSelectMany();
+  _testSingle();
+  _testSingleOrDefault();
+  _testSkip();
+  _testSkipWhile();
+  _testSum();
+  _testTake();
+  _testTakeWhile();
+  _testThenBy();
+  _testToCollection();
+  _testToDictionary();
+  _testToLookup();
+  _testUnion();
+  _testWhere();
 }
 
-void testAggregate() {
-  var source1 = [1, 0, 0, 0, 0];
-  var expected = 16;
-  var result = new Collection(source1).aggregate((r, e) => r + r);
-  expect(result, expected, reason: "aggregate()");
-  //
-  source1 = [1, 2, 3, 4];
-  expected = 10;
-  result = new Collection(source1).aggregate((r, e) => r + e);
-  expect(result, expected, reason: "aggregate()");
-  //
-  source1 = ["a", "b", "c", "d"];
-  expected = "a, b, c, d";
-  result = new Collection(source1).aggregate((r, e) => "$r, $e");
-  expect(result, expected, reason: "aggregate()");
-  //
-  source1 = [10, 20, 30, 40];
-  expected = 1200000;
-  result = new Collection(source1).aggregate((r, e) => r * e, 5);
-  expect(result, expected, reason: "aggregate()");
-  //
-  source1 = [];
-  expected = 41;
-  result = new Collection(source1).aggregate((r, e) => r + e, 41);
-  expect(result, expected, reason: "aggregate()");
-}
-
-void testAll() {
-  var source1 = [];
-  var expected = true;
-  var result = new Collection(source1).all((e) => e == 0);
-  expect(result, expected, reason: "all()");
-  //
-  source1 = [0];
-  expected = true;
-  result = new Collection(source1).all((e) => e == 0);
-  expect(result, expected, reason: "all()");
-  //
-  source1 = [0, 1];
-  expected = false;
-  result = new Collection(source1).all((e) => e == 0);
-  expect(result, expected, reason: "all()");
-}
-
-void testAny() {
-  var source1 = [];
-  var expected = false;
-  var result = new Collection(source1).any();
-  expect(result, expected, reason: "any()");
-  //
-  source1 = [0];
-  expected = true;
-  result = new Collection(source1).any();
-  expect(result, expected, reason: "any()");
-  //
-  source1 = [0];
-  expected = true;
-  result = new Collection(source1).any((e) => e == 0);
-  expect(result, expected, reason: "any()");
-  //
-  source1 = [0];
-  expected = false;
-  result = new Collection(source1).any((e) => e != 0);
-  expect(result, expected, reason: "any()");
-  //
-  source1 = [1, 0];
-  expected = true;
-  result = new Collection(source1).any((e) => e == 0);
-  expect(result, expected, reason: "any()");
-  //
-  source1 = [0, 0];
-  expected = false;
-  result = new Collection(source1).any((e) => e != 0);
-  expect(result, expected, reason: "any()");
-}
-
-void testAverage() {
-  var source1 = [0, 1, 2, 3, 4];
-  var expected = 2.0;
-  var result = new Collection(source1).average();
-  expect(result, expected, reason: "average()");
-  //
-  result = new Collection(source1).average((e) => e * 10);
-  expected = 20.0;
-  expect(result, expected, reason: "average()");
-}
-
-void testCast() {
-  var source = [0, 1, 2, 3, 4];
-  var expected = source;
-  var query = new Collection(source).cast();
-  var list = query.toList();
-  expect(list, expected, reason: "cast()");
-}
-
-void testConcat() {
-  var source1 = [0, 1, 2, 3, 4];
-  var source2 = new Collection([5, 6, 7, 8, 9]);
-  var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var query = new Collection(source1).concat(source2);
-  var list = query.toList();
-  expect(list, expected, reason: "concat()");
-  //
-  source1 = [];
-  source2 = new Collection([]);
-  expected = [];
-  query = new Collection(source1).concat(source2);
-  list = query.toList();
-  expect(list, expected, reason: "concat()");
-}
-
-void testContains() {
-  var source1 = [0, 1, 2, 3, 4];
-  var expected = true;
-  var result = new Collection(source1).contains(2);
-  expect(result, expected, reason: "contains()");
-  //
-  result = new Collection(source1).contains(5);
-  expected = false;
-  expect(result, expected, reason: "contains()");
-  //
-  source1 = [];
-  result = new Collection(source1).contains(null);
-  expected = false;
-  expect(result, expected, reason: "contains()");
-}
-
-void testCount() {
-  var source1 = [0, 1, 2, 3, 4];
-  var expected = 5;
-  var result = new Collection(source1).count();
-  expect(result, expected, reason: "count()");
-  //
-  result = new Collection(source1).count((e) => e > 0);
-  expected = 4;
-  expect(result, expected, reason: "count()");
-}
-
-void testDefaultIfEmpty() {
-  var source = [];
-  var expected = [41];
-  var query = new Collection(source).defaultIfEmpty(41);
-  var list = query.toList();
-  expect(list, expected, reason: "defaultIfEmpty()");
-  //
-  source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  query = new Collection(source).defaultIfEmpty(41);
-  list = query.toList();
-  expect(list, expected, reason: "defaultIfEmpty()");
-}
-
-void testDistinct() {
-  var source = [0, 1, 2, 3, 4, 3, 2, 1, 0];
-  var expected = [0, 1, 2, 3, 4];
-  var query = new Collection(source).distinct();
-  var list = query.toList();
-  expect(list, expected, reason: "distinct()");
-  //
-  source = [];
-  expected = [];
-  query = new Collection(source).distinct();
-  list = query.toList();
-  expect(list, expected, reason: "distinct()");
-}
-
-void testElementAt() {
-  var source1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = 5;
-  var result = new Collection(source1).elementAt(5);
-  expect(result, expected, reason: "elementAt()");
-  //
-  expected = 5;
-  result = Enumerable.range(0, 10).elementAt(5);
-  expect(result, expected, reason: "elementAt()");
-}
-
-void testElementAtOrDefault() {
-  var source1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = 5;
-  var result = new Collection(source1).elementAtOrDefault(5);
-  expect(result, expected, reason: "elementAt()");
-  //
-  expected = 5;
-  result = Enumerable.range(0, 10).elementAtOrDefault(5);
-  expect(result, expected, reason: "elementAt()");
-  //
-  source1 = [];
-  expected = null;
-  result = new Collection(source1).elementAtOrDefault(5);
-  expect(result, expected, reason: "elementAt()");
-}
-
-void testExcept() {
-  var source1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var source2 = new Collection([3, 4, 5, 6]);
-  var expected = [0, 1, 2, 7, 8, 9];
-  var query = new Collection(source1).except(source2);
-  var list = query.toList();
-  expect(list, expected, reason: "except()");
-  //
-  source1 = [];
-  source2 = new Collection([]);
-  expected = [];
-  query = new Collection(source1).except(source2);
-  list = query.toList();
-  expect(list, expected, reason: "except()");
-}
-
-void testFirst() {
-  var source1 = [0, 1];
-  var expected = 0;
-  var result = new Collection(source1).first();
-  expect(result, expected, reason: "first()");
-  //
-  source1 = [0, 1];
-  expected = 1;
-  result = new Collection(source1).first((e) => e > 0);
-  expect(result, expected, reason: "first()");
-}
-
-void testFirstOrDefault() {
-  var source1 = [0, 1];
-  var expected = 0;
-  var result = new Collection(source1).firstOrDefault();
-  expect(result, expected, reason: "firstOrDefault()");
-  //
-  source1 = [0, 1];
-  expected = 1;
-  result = new Collection(source1).firstOrDefault((e) => e > 0);
-  expect(result, expected, reason: "firstOrDefault()");
-  //
-  source1 = [];
-  expected = null;
-  result = new Collection(source1).firstOrDefault();
-  expect(result, expected, reason: "firstOrDefault()");
-  //
-  source1 = [];
-  expected = null;
-  result = new Collection(source1).firstOrDefault((e) => e > 0);
-  expect(result, expected, reason: "firstOrDefault()");
-  //
-  source1 = [0, 1];
-  expected = null;
-  result = new Collection(source1).firstOrDefault((e) => e > 1);
-  expect(result, expected, reason: "firstOrDefault()");
-}
-
-void testGroupBy() {
-  var query = new Collection(children).groupBy((c) => c.parent);
-  var expected = {a : [a1], b : [b1, b2], c : [c1, c2, c3]};
-  var list = query.toList();
-  var result = {};
-  for(var group in list) {
-    result[group.key] = [];
-    for(Child child in group) {
-      result[group.key].add(child);
+IEnumerable<PetOwner> petOwners = new Collection<PetOwner>([
+  new PetOwner("a")..pets = new Collection<Pet>([new Pet("a1", 1)]),
+  new PetOwner("b")
+    ..pets = new Collection<Pet>([new Pet("b1", 1), new Pet("b2", 2)]),
+  new PetOwner("c")
+    ..pets = new Collection<Pet>(
+        [new Pet("c1", 1), new Pet("c2", 2), new Pet("c3", 3)]),
+])
+  ..toList().forEach((petOwner) {
+    for (var pet in petOwner.pets.asIterable()) {
+      pet.owner = petOwner;
     }
-  }
+  });
 
-  var actual = result;
-  expect(actual, expected, reason: "groupBy()");
-}
-
-void testGroupJoin() {
-  var query = new Collection(parents).groupJoin(new Collection(children), (p) => p, (c) => c.parent, (p, childern) => childern.toList());
-  var expected = [[a1], [b1, b2], [c1, c2, c3]];
-  var list = query.toList();
-  expect(list, expected, reason: "groupJoin()");
-}
-
-void testIntersect() {
-  var source1 = [0, 1, 2, 3, 4, 3, 2, 1, 0];
-  var source2 = new Collection([5, 4, 2]);
-  var expected = [4, 2];
-  var query = new Collection(source1).intersect(source2);
-  var list = query.toList();
-  expect(list, expected, reason: "intersect()");
-  //
-  source1 = [];
-  source2 = new Collection([]);
-  expected = [];
-  query = new Collection(source1).intersect(source2);
-  list = query.toList();
-  expect(list, expected, reason: "intersect()");
-}
-
-void testJoin() {
-  var query = new Collection(parents).join(new Collection(children), (p) => p, (c) => c.parent, (p, c) => c);
-  var expected = [a1, b1, b2, c1, c2, c3];
-  var list = query.toList();
-  expect(list, expected, reason: "join()");
-}
-
-void testLast() {
-  var source1 = [0, 1];
-  var expected = 1;
-  var result = new Collection(source1).last();
-  expect(result, expected, reason: "last()");
-  //
-  source1 = [0, 1, 2 ,3];
-  expected = 3;
-  result = new Collection(source1).last((e) => e > 0);
-  expect(result, expected, reason: "last()");
-}
-
-void testLastOrDefault() {
-  var source1 = [0, 1];
-  var expected = 1;
-  var result = new Collection(source1).lastOrDefault();
-  expect(result, expected, reason: "lastOrDefault()");
-  //
-  source1 = [0, 1, 2, 3];
-  expected = 3;
-  result = new Collection(source1).lastOrDefault((e) => e > 0);
-  expect(result, expected, reason: "lastOrDefault()");
-  //
-  source1 = [];
-  expected = null;
-  result = new Collection(source1).lastOrDefault();
-  expect(result, expected, reason: "lastOrDefault()");
-  //
-  source1 = [];
-  expected = null;
-  result = new Collection(source1).lastOrDefault((e) => e > 0);
-  expect(result, expected, reason: "lastOrDefault()");
-  //
-  source1 = [0, 1];
-  expected = null;
-  result = new Collection(source1).lastOrDefault((e) => e > 1);
-  expect(result, expected, reason: "lastOrDefault()");
-}
-
-void testMax() {
-  var source1 = [4, 3, 2, 1, 0];
-  var expected = 4;
-  var result = new Collection(source1).max();
-  expect(result, expected, reason: "max()");
-  //
-  source1 = [4, 3, 2, 1];
-  expected = 40;
-  result = new Collection(source1).max((e) => e * 10);
-  expect(result, expected, reason: "max()");
-  //
-  source1 = [1, null, -5];
-  result = new Collection(source1).max();
-  expected = 1;
-  expect(result, expected, reason: "max()");
-  //
-  source1 = [];
-  result = new Collection(source1).max();
-  expected = null;
-  expect(result, expected, reason: "max()");
-}
-
-void testMin() {
-  var source1 = [4, 3, 2, 1, 0];
-  var expected = 0;
-  var result = new Collection(source1).min();
-  expect(result, expected, reason: "min()");
-  //
-  source1 = [4, 3, 2, 1];
-  expected = 10;
-  result = new Collection(source1).min((e) => e * 10);
-  expect(result, expected, reason: "min()");
-  //
-  source1 = [1, null, -5];
-  result = new Collection(source1).min();
-  expected = -5;
-  expect(result, expected, reason: "min()");
-  //
-  source1 = [];
-  result = new Collection(source1).min();
-  expected = null;
-  expect(result, expected, reason: "min()");
-}
-
-void testOfType() {
-  var source = [0, 1, 2, 3, 4];
-  var expected = source;
-  var query = new Collection(source).ofType();
-  var list = query.toList();
-  expect(list, expected, reason: "cast()");
-}
-
-void testOrderBy() {
-  var length = 500;
-  var source = new List<int>(length);
-  var expected = new List<int>(length);
-  for(var i = 0; i < length; i++) {
-    source[i] = length - i - 1;
-    expected[i] = i;
-  }
-
-  var query = new Collection(source).orderBy((int e) => e);
-  var list = query.toList();
-  expect(list, expected, reason: "orderBy()");
-
-  length = 500;
-  source = new List<int>(length);
-  expected = new List<int>(length);
-  for(var i = 0; i < length; i++) {
-    source[i] = i;
-    expected[i] = length - i - 1;
-  }
-
-  query = new Collection(source).orderByDescending((int e) => e);
-  list = query.toList();
-  expect(list, expected, reason: "orderBy()");
-}
-
-void testRange() {
-  var expected = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4];
-  var query = Enumerable.range(-5, 10);
-  var list = query.toList();
-  expect(list, expected, reason: "range()");
-  //
-  expected = <int>[];
-  query = Enumerable.range(100, 0);
-  list = query.toList();
-  expect(list, expected, reason: "range(");
-}
-
-void testRepeat() {
-  var expected = [-5, -5, -5, -5, -5, -5, -5, -5, -5, -5];
-  var query = Enumerable.repeat(-5, 10);
-  var list = query.toList();
-  expect(list, expected, reason: "repeat()");
-  //
-  expected = <int>[];
-  query = Enumerable.repeat(100, 0);
-  list = query.toList();
-  expect(list, expected, reason: "repeat(");
-}
-
-void testSelect() {
-  var source = [0, 1, 2, 3, 4, 3, 2, 1, 0];
-  var expected = [0, 10, 20, 30, 40, 30, 20, 10, 0];
-  var query = new Collection(source).select((e) => e * 10);
-  var list = query.toList();
-  expect(list, expected, reason: "select()");
-  //
-  source = [];
-  expected = [];
-  query = new Collection(source).select((e) => e);
-  list = query.toList();
-  expect(list, expected, reason: "select()");
-}
-
-void testSelectMany() {
-  var source = [[0], [1, 2], [3, 4, 5]];
-  var expected = [0, 1, 2, 3, 4, 5];
-  var query = new Collection(source).selectMany((e) => new Collection(e));
-  var list = query.toList();
-  expect(list, expected, reason: "selectMany()");
-  //
-  source = [];
-  expected = [];
-  query = new Collection(source).selectMany((e) => new Collection(e));
-  list = query.toList();
-  expect(list, expected, reason: "selectMany(");
-}
-
-void testSingle() {
-  var source = [0];
-  var expected = 0;
-  var result = new Collection(source).single();
-  expect(result, expected, reason: "single()");
-  //
-  source = [0, 10, 20, 30];
-  expected = 20;
-  result = new Collection(source).single((e) => e > 10 && e < 30);
-  expect(result, expected, reason: "single()");
-  //
-  var exception;
-  try {
-    new Collection([]).single();
-  } catch(e) {
-    exception = e;
-  }
-
-  expect(exception != null, true, reason: "single()");
-  //
-  exception = null;
-  try {
-    new Collection([0]).single((e) => e == 1);
-  } catch(e) {
-    exception = e;
-  }
-
-  expect(exception != null, true, reason: "single()");
-}
-
-void testSingleOrDefault() {
-  var source = [0];
-  var expected = 0;
-  var result = new Collection(source).singleOrDefault();
-  expect(result, expected, reason: "singleOrDefault()");
-  source = [0, 10, 20, 30];
-  expected = 20;
-  //
-  result = new Collection(source).singleOrDefault((e) => e > 10 && e < 30);
-  expect(result, expected, reason: "singleOrDefault()");
-  expected = null;
-  //
-  result = new Collection(source).singleOrDefault((e) => e > 100);
-  expect(result, expected, reason: "singleOrDefault()");
-  //
-  source = [];
-  expected = null;
-  result = new Collection(source).singleOrDefault((e) => e > 10 && e < 30);
-  expect(result, expected, reason: "singleOrDefault()");
-}
-
-void testSkip() {
-  var source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = [5, 6, 7, 8, 9];
-  var query = new Collection(source).skip(5);
-  var list = query.toList();
-  expect(list, expected, reason: "skip()");
-  //
-  expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  query = new Collection(source).skip(0);
-  list = query.toList();
-  expect(list, expected, reason: "skip()");
-}
-
-void testSkipWhile() {
-  var source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = [5, 6, 7, 8, 9];
-  var query = new Collection(source).skipWhile((e) => e != 5);
-  var list = query.toList();
-  expect(list, expected, reason: "skipWhile()");
-  //
-  expected = source;
-  query = new Collection(source).skipWhile((e) => false);
-  list = query.toList();
-  expect(list, expected, reason: "skipWhile()");
-}
-
-void testSum() {
-  var source1 = [0, 1, 2, 3, 4];
-  var expected = 10;
-  var result = new Collection(source1).sum();
-  expect(result, expected, reason: "sum()");
-  //
-  result = new Collection(source1).sum((e) => e * 10);
-  expected = 100;
-  expect(result, expected, reason: "sum()");
-  //
-  source1 = [];
-  result = new Collection(source1).sum();
-  expected = null;
-  expect(result, expected, reason: "sum()");
-}
-
-void testTake() {
-  var source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = [0, 1, 2, 3, 4];
-  var query = new Collection(source).take(5);
-  var list = query.toList();
-  expect(list, expected, reason: "take()");
-  //
-  expected = [];
-  query = new Collection(source).take(0);
-  list = query.toList();
-  expect(list, expected, reason: "take()");
-}
-
-void testTakeWhile() {
-  var source = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var expected = [0, 1, 2, 3, 4];
-  var query = new Collection(source).takeWhile((e) => e < 5);
-  var list = query.toList();
-  expect(list, expected, reason: "takeWhile()");
-  //
-  expected = source;
-  query = new Collection(source).takeWhile((e) => true);
-  list = query.toList();
-  expect(list, expected, reason: "takeWhile()");
-}
-
-void testThenBy() {
-  var source = ["grape", "passionfruit", "banana", "mango", "orange", "raspberry", "apple", "blueberry"];
-  var expected = ["apple", "grape", "mango", "banana", "orange", "blueberry", "raspberry", "passionfruit"];
-  var query = new Collection(source).orderBy((s) => s.length).thenBy((s) => s);
-  var list = query.toList();
-  expect(list, expected, reason: "thenBy()");
-  //
-  expected = ["passionfruit", "raspberry", "blueberry", "orange", "banana", "mango", "grape", "apple"];
-  query = new Collection(source).orderByDescending((s) => s.length).thenByDescending((s) => s);
-  list = query.toList();
-  expect(list, expected, reason: "thenBy()");
-}
-
-void testToCollection() {
-  //
-}
-
-void testToDictionary() {
-  var result = new Collection(children).toDictionary((c) => c.parent, (c) => c).toMap();
-  var expected = {a : a1, b : b2, c : c3};
-  expect(result, expected, reason: "groupBy()");
-}
-
-void testToLookup() {
-  var lookup = new Collection(children).toLookup((c) => c.parent, (c) => c);
-  var expected = {a : [a1], b : [b1, b2], c : [c1, c2, c3]};
-  var list = lookup.toList();
-  var result = {};
-  for(var group in list) {
-    result[group.key] = [];
-    for(Child child in group) {
-      result[group.key].add(child);
-    }
-  }
-
-  var actual = result;
-  expect(actual, expected, reason: "groupBy()");
-}
-
-void testToMap() {
-  var query = new Collection(children).toLookup((c) => c.parent, (c) => c);
-  var expected = {a : [a1], b : [b1, b2], c : [c1, c2, c3]};
-  var list = query.toList();
-  var result = {};
-  for(var group in list) {
-    result[group.key] = [];
-    for(Child child in group) {
-      result[group.key].add(child);
-    }
-  }
-
-  var actual = result;
-  expect(actual, expected, reason: "groupBy()");
-}
-
-void testUnion() {
-  var source1 = [0, 1, 2, 3, 4, 0, 1, 2, 3, 4];
-  var source2 = new Collection([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]);
-  var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  var query = new Collection(source1).union(source2);
-  var list = query.toList();
-  expect(list, expected, reason: "union()");
-  //
-  source1 = [0, 1, 2, 3, 4, 0, 1, 2, 3, 4];
-  source2 = new Collection([]);
-  expected = [0, 1, 2, 3, 4];
-  query = new Collection(source1).union(source2);
-  list = query.toList();
-  expect(list, expected, reason: "union()");
-}
-
-void testWhere() {
-  var source = [0, 1, 2, 3, 4, 3, 2, 1, 0];
-  var expected = [0, 1, 2, 2, 1, 0];
-  var query = new Collection(source).where((e) => e < 3);
-  var list = query.toList();
-  expect(list, expected, reason: "where()");
-  //
-  expected = source;
-  query = new Collection(source).where((e) => true);
-  list = query.toList();
-  expect(list, expected, reason: "where()");
-}
-
-final Parent a = new Parent("a");
-final Parent b = new Parent("b");
-final Parent c = new Parent("c");
-final Child a1 = new Child("a1", a);
-final Child b1 = new Child("a1", b);
-final Child b2 = new Child("b1", b);
-final Child c1 = new Child("b2", c);
-final Child c2 = new Child("c1", c);
-final Child c3 = new Child("c2", c);
-final List<Child> children = <Child>[a1, b1, b2, c1 ,c2 ,c3];
-final List<Parent> parents = <Parent>[a, b, c];
+IEnumerable<Pet> pets = petOwners.selectMany<Pet>((e) => e.pets);
 
 List getList(Iterator iterator) {
   var list = [];
-  while(iterator.moveNext()) {
+  while (iterator.moveNext()) {
     list.add(iterator.current);
   }
 
   return list;
 }
 
-class Parent {
+void _testAggregate() {
+  test("Aggregate", () {
+    {
+      var data = new Collection<int>([1, 0, 0, 0, 0]);
+      var expected = 16;
+      var result = data.aggregate((r, e) => r + r);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, 2, 3, 4]);
+      var expected = 10;
+      var result = data.aggregate((r, e) => r + e);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<String>(["a", "b", "c", "d"]);
+      var expected = "a, b, c, d";
+      var result = data.aggregate((r, e) => "$r, $e");
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([10, 20, 30, 40]);
+      var expected = 1200000;
+      var result = data.aggregate$1<int>(5, (r, e) => r * e);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = 41;
+      var result = data.aggregate$1<int>(41, (r, e) => r + e);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<double>([10.0, 20.0, 30.0, 40.0]);
+      var expected = 1200000;
+      var result =
+          data.aggregate$2<double, int>(5.0, (r, e) => r * e, (r) => r.round());
+      expect(result, expected);
+    }
+  });
+}
+
+void _testAll() {
+  test("All", () {
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = true;
+      var result = data.all((e) => e == 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0]);
+      var expected = true;
+      var result = data.all((e) => e == 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = false;
+      var result = data.all((e) => e == 0);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testAny() {
+  test("Any", () {
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = false;
+      var result = data.any();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0]);
+      var expected = true;
+      var result = data.any();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0]);
+      var expected = true;
+      var result = data.any((e) => e == 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0]);
+      var expected = false;
+      var result = data.any((e) => e != 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, 0]);
+      var expected = true;
+      var result = data.any((e) => e == 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 0]);
+      var expected = false;
+      var result = data.any((e) => e != 0);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testAppend() {
+  test("Append", () {
+    {
+      var data = new Collection<int>([1, 2]);
+      var expected = [1, 2, 3];
+      var query = data.append(3);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testAverage() {
+  test("Average", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var expected = 2.0;
+      var result = data.average();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var result = data.average((e) => e * 10);
+      var expected = 20.0;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testCast() {
+  test("Cast", () {
+    {
+      expect(false, !true);
+    }
+  });
+}
+
+void _testConcat() {
+  test("Concat", () {
+    {
+      var data1 = new Collection<int>([0, 1, 2, 3, 4]);
+      var data2 = new Collection<int>([5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data1.concat(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data1 = new Collection<int>(<int>[]);
+      var data2 = new Collection<int>(<int>[]);
+      var expected = <int>[];
+      var query = data1.concat(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testContains() {
+  test("Contains", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var expected = true;
+      var result = data.contains(2);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var result = data.contains(5);
+      var expected = false;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var result = data.contains(null);
+      var expected = false;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testCount() {
+  test("Count", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var expected = 5;
+      var result = data.count();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var result = data.count((e) => e > 0);
+      var expected = 4;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testDefaultIfEmpty() {
+  test("DefaultIfEmpty", () {
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = [41];
+      var query = data.defaultIfEmpty(41);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data.defaultIfEmpty(41);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testDistinct() {
+  test("Distinct", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data.distinct();
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = <int>[];
+      var query = data.distinct();
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testElementAt() {
+  test("ElementAt", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = 5;
+      var result = data.elementAt(5);
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = 5;
+      var result = Enumerable.range(0, 10).elementAt(5);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testElementAtOrDefault() {
+  test("ElementAtOrDefault", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = 5;
+      var result = data.elementAtOrDefault(5);
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = 5;
+      var result = Enumerable.range(0, 10).elementAtOrDefault(5);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var expected = null;
+      var result = data.elementAtOrDefault(5);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testExcept() {
+  test("Except", () {
+    {
+      var data1 = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var data2 = new Collection<int>([3, 4, 5, 6]);
+      var expected = [0, 1, 2, 7, 8, 9];
+      var query = data1.except(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data1 = new Collection([]);
+      var data2 = new Collection([]);
+      var expected = [];
+      var query = data1.except(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testFirst() {
+  test("First", () {
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 0;
+      var result = data.first();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 1;
+      var result = data.first((e) => e > 0);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testFirstOrDefault() {
+  test("FirstOrDefault", () {
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 0;
+      var result = data.firstOrDefault();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 1;
+      var result = data.firstOrDefault((e) => e > 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var expected = null;
+      var result = data.firstOrDefault();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = null;
+      var result = data.firstOrDefault((e) => e > 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = null;
+      var result = data.firstOrDefault((e) => e > 1);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testGroupBy() {
+  test("GroupBy", () {
+    {
+      var query = pets.groupBy<int>((pet) => pet.age);
+      var expected = <int, List<Pet>>{
+        1: pets.where((pet) => pet.age == 1).toList(),
+        2: pets.where((pet) => pet.age == 2).toList(),
+        3: pets.where((pet) => pet.age == 3).toList()
+      };
+
+      var result = <int, List<Pet>>{};
+      for (var group in query.asIterable()) {
+        result[group.key] = <Pet>[];
+        for (var child in group.asIterable()) {
+          result[group.key].add(child);
+        }
+      }
+
+      expect(result, expected);
+    }
+    //
+    {
+      var query = pets.groupBy$1<int, String>((e) => e.age, (e) => e.name);
+      var expected = <int, List<String>>{
+        1: pets
+            .where((pet) => pet.age == 1)
+            .select<String>((pet) => pet.name)
+            .toList(),
+        2: pets
+            .where((pet) => pet.age == 2)
+            .select<String>((pet) => pet.name)
+            .toList(),
+        3: pets
+            .where((pet) => pet.age == 3)
+            .select<String>((pet) => pet.name)
+            .toList()
+      };
+
+      var result = <int, List<String>>{};
+      for (var group in query.asIterable()) {
+        result[group.key] = <String>[];
+        for (var child in group.asIterable()) {
+          result[group.key].add(child);
+        }
+      }
+
+      expect(result, expected);
+    }
+    //
+    {
+      var query = pets.groupBy$2<int, String>(
+          (pet) => pet.age, (age, pet) => pet.toList().join(", "));
+      var expected = [
+        "a1, b1, c1",
+        "b2, c2",
+        "c3",
+      ];
+
+      var result = query.toList();
+      expect(result, expected);
+    }
+    //
+    {
+      var query = pets.groupBy$3<int, String, String>((pet) => pet.age,
+          (pet) => "@" + pet.name, (age, pet) => pet.toList().join(", "));
+      var expected = [
+        "@a1, @b1, @c1",
+        "@b2, @c2",
+        "@c3",
+      ];
+
+      var result = query.toList();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testGroupJoin() {
+  test("GroupJoin", () {
+    {
+      var query = petOwners.groupJoin<Pet, PetOwner, List>(
+          pets,
+          (petOwner) => petOwner,
+          (pet) => pet.owner,
+          (petOwner, pets) =>
+              [petOwner, pets.select((pet) => pet.name).toList()]);
+      var expected = [
+        [
+          petOwners.where((petOwner) => petOwner.name == "a").single(),
+          pets
+              .where((pet) => pet.owner.name == "a")
+              .select((pet) => pet.name)
+              .toList()
+        ],
+        [
+          petOwners.where((petOwner) => petOwner.name == "b").single(),
+          pets
+              .where((pet) => pet.owner.name == "b")
+              .select((pet) => pet.name)
+              .toList()
+        ],
+        [
+          petOwners.where((petOwner) => petOwner.name == "c").single(),
+          pets
+              .where((pet) => pet.owner.name == "c")
+              .select((pet) => pet.name)
+              .toList()
+        ],
+      ];
+
+      var result = query.toList();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testIntersect() {
+  test("Intersect", () {
+    {
+      var data1 = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
+      var data2 = new Collection<int>([5, 4, 2]);
+      var expected = [2, 4];
+      var query = data1.intersect(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data1 = new Collection([]);
+      var data2 = new Collection([]);
+      var expected = [];
+      var query = data1.intersect(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testJoin() {
+  test("Join", () {
+    {
+      var query = petOwners.join<Pet, PetOwner, String>(
+          pets,
+          (petOwner) => petOwner,
+          (pet) => pet.owner,
+          (petOwner, pet) => "${petOwner.name} - ${pet.name}");
+      var expected = [
+        "a - a1",
+        "b - b1",
+        "b - b2",
+        "c - c1",
+        "c - c2",
+        "c - c3",
+      ];
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testLast() {
+  test("Last", () {
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 1;
+      var result = data.last();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3]);
+      var expected = 3;
+      var result = data.last((e) => e > 0);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testLastOrDefault() {
+  test("LastOrDefault", () {
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = 1;
+      var result = data.lastOrDefault();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3]);
+      var expected = 3;
+      var result = data.lastOrDefault((e) => e > 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var expected = null;
+      var result = data.lastOrDefault();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = null;
+      var result = data.lastOrDefault((e) => e > 0);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1]);
+      var expected = null;
+      var result = data.lastOrDefault((e) => e > 1);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testMax() {
+  test("Max", () {
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 4;
+      var result = data.max();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 40;
+      var result = data.max$1<int>((e) => e * 10);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.max();
+      var expected = 1;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.max$1<int>((e) => e * 2);
+      var expected = 2;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.max();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.max$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.max();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.max$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testMin() {
+  test("Min", () {
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 0;
+      var result = data.min();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 0;
+      var result = data.min$1<int>((e) => e * 10);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.min();
+      var expected = -5;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.min$1<int>((e) => e * 2);
+      var expected = -10;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.min();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.min$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.min();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.min$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testOfType() {
+  test("OfType", () {
+    expect(false, !true);
+  });
+}
+
+void _testOrderBy() {
+  test("OrderBy", () {
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data.orderBy<int>((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4]);
+      var expected = [4, 3, 2, 1, 0];
+      var query = data.orderByDescending<int>((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testPrepend() {
+  test("Prepend", () {
+    {
+      var data = new Collection<int>([1, 2]);
+      var expected = [0, 1, 2];
+      var query = data.prepend(0);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testRange() {
+  test("Range", () {
+    {
+      var expected = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4];
+      var query = Enumerable.range(-5, 10);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = <int>[];
+      var query = Enumerable.range(100, 0);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testRepeat() {
+  test("Repeat", () {
+    {
+      var expected = [-5, -5, -5, -5, -5, -5, -5, -5, -5, -5];
+      var query = Enumerable.repeat(-5, 10);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = <int>[];
+      var query = Enumerable.repeat(100, 0);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSelect() {
+  test("Select", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
+      var expected = [0, 10, 20, 30, 40, 30, 20, 10, 0];
+      var query = data.select((e) => e * 10);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var expected = [];
+      var query = data.select((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSelectMany() {
+  test("SelectMany", () {
+    {
+      var data = new Collection([
+        [0],
+        [1, 2],
+        [3, 4, 5]
+      ]);
+      var expected = [0, 1, 2, 3, 4, 5];
+      var query = data.selectMany((e) => new Collection(e));
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = pets.asIterable();
+      var query = petOwners.selectMany<Pet>((petOwner) => petOwner.pets);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = ["0a1", "1b1", "1b2", "2c1", "2c2", "2c3"];
+      var query = petOwners.selectMany$1<String>(
+          (petOwner, index) => petOwner.pets.select((pet) => "${index}${pet}"));
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var expected = ["a a1", "b b1", "b b2", "c c1", "c c2", "c c3"];
+      var query = petOwners.selectMany$2<Pet, String>(
+          (petOwner) => petOwner.pets,
+          (petOwner, pet) => "${petOwner.name} ${pet.name}");
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSingle() {
+  test("Single", () {
+    {
+      var data = new Collection<int>([0]);
+      var expected = 0;
+      var result = data.single();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 10, 20, 30]);
+      var expected = 20;
+      var result = data.single((e) => e > 10 && e < 30);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var exception;
+      try {
+        data.single();
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception != null, true);
+    }
+    //
+    {
+      var data = new Collection([]);
+      var exception;
+      try {
+        data.single((e) => e == 1);
+      } catch (e) {
+        exception = e;
+      }
+
+      expect(exception != null, true);
+    }
+  });
+}
+
+void _testSingleOrDefault() {
+  test("SingleOrDefault", () {
+    {
+      var data = new Collection<int>([0]);
+      var expected = 0;
+      var result = data.singleOrDefault();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 10, 20, 30]);
+      var expected = 20;
+      var result = data.singleOrDefault((e) => e > 10 && e < 30);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 10, 20, 30]);
+      var expected = null;
+      var result = data.singleOrDefault((e) => e > 100);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>(<int>[]);
+      var expected = null;
+      var result = data.singleOrDefault((e) => e > 10 && e < 30);
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSkip() {
+  test("Skip", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [5, 6, 7, 8, 9];
+      var query = data.skip(5);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data.skip(0);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSkipWhile() {
+  test("SkipWhile", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [5, 6, 7, 8, 9];
+      var query = data.skipWhile((e) => e != 5);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data.skipWhile((e) => false);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testSum() {
+  test("Sum", () {
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 10;
+      var result = data.sum();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([4, 3, 2, 1, 0]);
+      var expected = 100;
+      var result = data.sum$1<int>((e) => e * 10);
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.sum();
+      var expected = -4;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([1, null, -5]);
+      var result = data.sum$1<int>((e) => e * 2);
+      var expected = -8;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.sum();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([]);
+      var result = data.sum$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.sum();
+      var expected = null;
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([null]);
+      var result = data.sum$1<int>((e) => e);
+      var expected = null;
+      expect(result, expected);
+    }
+  });
+}
+
+void _testTake() {
+  test("Take", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data.take(5);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [];
+      var query = data.take(0);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testTakeWhile() {
+  test("TakeWhile", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data.takeWhile((e) => e < 5);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data.takeWhile((e) => true);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data.takeWhile$1((e, i) => e == i);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testThenBy() {
+  test("ThenBy", () {
+    {
+      var data = new Collection<String>([
+        "grape",
+        "passionfruit",
+        "banana",
+        "mango",
+        "orange",
+        "raspberry",
+        "apple",
+        "blueberry"
+      ]);
+      var expected = [
+        "apple",
+        "grape",
+        "mango",
+        "banana",
+        "orange",
+        "blueberry",
+        "raspberry",
+        "passionfruit"
+      ];
+
+      var query =
+          data.orderBy<int>((str) => str.length).thenBy<String>((str) => str);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<String>([
+        "grape",
+        "passionfruit",
+        "banana",
+        "mango",
+        "orange",
+        "raspberry",
+        "apple",
+        "blueberry"
+      ]);
+      var expected = [
+        "passionfruit",
+        "raspberry",
+        "blueberry",
+        "orange",
+        "banana",
+        "mango",
+        "grape",
+        "apple"
+      ];
+      var query = data
+          .orderByDescending<int>((str) => str.length)
+          .thenByDescending((str) => str);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testToCollection() {
+  test("ToCollection", () {
+    {
+      var data = new Collection<int>([0, 1, 2]);
+      var expected = true;
+      var result = data.sequenceEqual(data.toCollection());
+      expect(result, expected);
+    }
+  });
+}
+
+void _testToDictionary() {
+  test("ToDictionary", () {
+    {
+      var data = new Collection<int>([0, 1]);
+      var result = data.toDictionary<String>((kv) => "$kv").toMap();
+      var expected = {"0": 0, "1": 1};
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Dictionary<int, String>.fromMap({0: "a", 1: "b"});
+      var result = data
+          .toDictionary$1<int, String>((kv) => kv.key, (kv) => kv.value)
+          .toMap();
+      var expected = {0: "a", 1: "b"};
+      expect(result, expected);
+    }
+  });
+}
+
+void _testToLookup() {
+  test("ToLookup", () {
+    {
+      var query = pets.toLookup<PetOwner>((pet) => pet.owner);
+      var expected = <PetOwner, List<Pet>>{
+        petOwners.where((petOwner) => petOwner.name == "a").single():
+            pets.where((pet) => pet.owner.name == "a").toList(),
+        petOwners.where((petOwner) => petOwner.name == "b").single():
+            pets.where((pet) => pet.owner.name == "b").toList(),
+        petOwners.where((petOwner) => petOwner.name == "c").single():
+            pets.where((pet) => pet.owner.name == "c").toList()
+      };
+      var result = <PetOwner, List<Pet>>{};
+      for (var group in query.asIterable()) {
+        result[group.key] = <Pet>[];
+        for (var pet in group.asIterable()) {
+          result[group.key].add(pet);
+        }
+      }
+
+      expect(result, expected);
+    }
+    //
+    {
+      var query = pets.toLookup$1<PetOwner, String>(
+          (pet) => pet.owner, (pet) => pet.name);
+      var expected = <PetOwner, List<String>>{
+        petOwners.where((petOwner) => petOwner.name == "a").single(): pets
+            .where((pet) => pet.owner.name == "a")
+            .select<String>((pet) => pet.name)
+            .toList(),
+        petOwners.where((petOwner) => petOwner.name == "b").single(): pets
+            .where((pet) => pet.owner.name == "b")
+            .select<String>((pet) => pet.name)
+            .toList(),
+        petOwners.where((petOwner) => petOwner.name == "c").single(): pets
+            .where((pet) => pet.owner.name == "c")
+            .select<String>((pet) => pet.name)
+            .toList()
+      };
+      var result = <PetOwner, List<String>>{};
+      for (var group in query.asIterable()) {
+        result[group.key] = <String>[];
+        for (var name in group.asIterable()) {
+          result[group.key].add(name);
+        }
+      }
+
+      expect(result, expected);
+    }
+  });
+}
+
+void _testUnion() {
+  test("Union", () {
+    {
+      var data1 = new Collection<int>([0, 1, 2, 3, 4, 0, 1, 2, 3, 4]);
+      var data2 = new Collection<int>([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]);
+      var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      var query = data1.union(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data1 = new Collection<int>([0, 1, 2, 3, 4, 0, 1, 2, 3, 4]);
+      var data2 = new Collection<int>([]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data1.union(data2);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testWhere() {
+  test("Where", () {
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
+      var expected = [0, 1, 2, 2, 1, 0];
+      var query = data.where((e) => e < 3);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([0, 1, 2, 3, 4, 3, 2, 1, 0]);
+      var expected = [0, 1, 2, 3, 4];
+      var query = data.where$1((e, i) => e == i);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+class Pet {
+  int age;
   String name;
-  Parent(this.name);
+  PetOwner owner;
+  Pet(this.name, this.age);
   String toString() => name;
 }
 
-class Child {
-  Parent parent;
+class PetOwner {
   String name;
-  Child(this.name, this.parent);
+  PetOwner(this.name);
   String toString() => name;
-}
-
-class TypeOf<T> {
-  Type get type => T;
+  IEnumerable<Pet> pets;
 }

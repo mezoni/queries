@@ -1,6 +1,7 @@
 part of queries.collections;
 
-abstract class IList<TElement> implements ICollection<TElement>, IReadOnlyCollection<TElement> {
+abstract class IList<TElement>
+    implements ICollection<TElement>, IReadOnlyCollection<TElement> {
   TElement operator [](int index);
 
   void operator []=(int index, TElement item);
@@ -12,6 +13,7 @@ abstract class IList<TElement> implements ICollection<TElement>, IReadOnlyCollec
   TElement removeAt(int index);
 }
 
-abstract class IReadOnlyList<TElement> implements IReadOnlyCollection<TElement> {
+abstract class IReadOnlyList<TElement>
+    implements IReadOnlyCollection<TElement> {
   TElement operator [](int index);
 }

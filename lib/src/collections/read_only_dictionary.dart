@@ -1,6 +1,9 @@
 part of queries.collections;
 
-abstract class IReadOnlyDictionary<TKey, TValue> implements IReadOnlyCollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>> {
+abstract class IReadOnlyDictionary<TKey, TValue>
+    implements
+        IReadOnlyCollection<KeyValuePair<TKey, TValue>>,
+        IEnumerable<KeyValuePair<TKey, TValue>> {
   IEqualityComparer<TKey> get comparer;
 
   IEnumerable<TKey> get keys;
@@ -14,7 +17,8 @@ abstract class IReadOnlyDictionary<TKey, TValue> implements IReadOnlyCollection<
   Map<TKey, TValue> toMap();
 }
 
-class ReadOnlyDictionary<TKey, TValue> extends _ReadOnlyDictionary<TKey, TValue> with Enumerable<KeyValuePair<TKey, TValue>> {
+class ReadOnlyDictionary<TKey, TValue> extends _ReadOnlyDictionary<TKey, TValue>
+    with Enumerable<KeyValuePair<TKey, TValue>> {
   ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
       throw new ArgumentError("dictionary: $dictionary");
@@ -32,12 +36,15 @@ class ReadOnlyDictionary<TKey, TValue> extends _ReadOnlyDictionary<TKey, TValue>
   }
 }
 
-class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object with Enumerable<TKey> implements ICollection<TKey> {
+class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object
+    with Enumerable<TKey>
+    implements ICollection<TKey> {
   ReadOnlyDictionary<TKey, TValue> _dictionary;
 
   ICollection<TKey> _items;
 
-  ReadOnlyDictionaryKeyCollection._internal(ReadOnlyDictionary<TKey, TValue> dictionary) {
+  ReadOnlyDictionaryKeyCollection._internal(
+      ReadOnlyDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
       throw new ArgumentError("dictionary: $dictionary");
     }
@@ -91,12 +98,15 @@ class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object with Enumerab
   }
 }
 
-class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object with Enumerable<TValue> implements ICollection<TValue> {
+class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object
+    with Enumerable<TValue>
+    implements ICollection<TValue> {
   ReadOnlyDictionary<TKey, TValue> _dictionary;
 
   ICollection<TValue> _items;
 
-  ReadOnlyDictionaryValueCollection._internal(ReadOnlyDictionary<TKey, TValue> dictionary) {
+  ReadOnlyDictionaryValueCollection._internal(
+      ReadOnlyDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
       throw new ArgumentError("dictionary: $dictionary");
     }
@@ -150,7 +160,12 @@ class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object with Enumer
   }
 }
 
-abstract class _ReadOnlyDictionary<TKey, TValue> implements ICollection<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, IReadOnlyDictionary<TKey, TValue> {
+abstract class _ReadOnlyDictionary<TKey, TValue>
+    implements
+        ICollection<KeyValuePair<TKey, TValue>>,
+        IDictionary<TKey, TValue>,
+        IReadOnlyCollection<KeyValuePair<TKey, TValue>>,
+        IReadOnlyDictionary<TKey, TValue> {
   IDictionary<TKey, TValue> _dictionary;
 
   IEqualityComparer<TKey> get comparer {
@@ -207,8 +222,10 @@ abstract class _ReadOnlyDictionary<TKey, TValue> implements ICollection<KeyValue
   }
 
   Map<TKey, TValue> toMap() {
-    var map = new LinkedHashMap(equals: _dictionary.comparer.equals, hashCode: _dictionary.comparer.getHashCode);
-    for (var kvp in this) {
+    var map = new LinkedHashMap<TKey, TValue>(
+        equals: _dictionary.comparer.equals,
+        hashCode: _dictionary.comparer.getHashCode);
+    for (var kvp in this.asIterable()) {
       map[kvp.key] = kvp.value;
     }
 

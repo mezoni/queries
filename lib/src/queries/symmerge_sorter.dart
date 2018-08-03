@@ -7,14 +7,14 @@ part of queries;
  * Pok-Son Kim and Arne Kutzner
  */
 class _SymmergeSorter<TSource> {
-  Comparator<TSource> _comparer;
+  Comparator<TSource> _comparator;
 
-  _SymmergeSorter(Comparator<TSource> comparer) {
-    if (comparer == null) {
-      comparer = Comparable.compare as Comparator<TSource>;
+  _SymmergeSorter(Comparator<TSource> comparator) {
+    if (comparator == null) {
+      throw new ArgumentError.notNull("comparator");
     }
 
-    _comparer = comparer;
+    _comparator = comparator;
   }
 
   void sort(List<TSource> a) {
@@ -25,7 +25,7 @@ class _SymmergeSorter<TSource> {
     int mid;
     while (l < r) {
       mid = (l + r) >> 1;
-      if (_comparer(a[mid], a[p - mid]) <= 0) {
+      if (_comparator(a[mid], a[p - mid]) <= 0) {
         l = mid + 1;
       } else {
         r = mid;
@@ -78,7 +78,7 @@ class _SymmergeSorter<TSource> {
         int mid;
         while (l < r) {
           mid = (l + r) >> 1;
-          if (_comparer(a[mid], a[p - mid]) <= 0) {
+          if (_comparator(a[mid], a[p - mid]) <= 0) {
             l = mid + 1;
           } else {
             r = mid;
@@ -93,7 +93,7 @@ class _SymmergeSorter<TSource> {
         int mid;
         while (l < r) {
           mid = (l + r) >> 1;
-          if (_comparer(a[mid], a[p - mid]) <= 0) {
+          if (_comparator(a[mid], a[p - mid]) <= 0) {
             l = mid + 1;
           } else {
             r = mid;

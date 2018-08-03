@@ -4,7 +4,8 @@ abstract class IReadOnlyCollection<TElement> implements IEnumerable<TElement> {
   int get length;
 }
 
-class ReadOnlyCollection<TElement> extends _Collection<TElement> with Enumerable<TElement> {
+class ReadOnlyCollection<TElement> extends _Collection<TElement>
+    with Enumerable<TElement> {
   ReadOnlyCollection(List<TElement> items) {
     if (items == null) {
       throw new ArgumentError("items: $items");

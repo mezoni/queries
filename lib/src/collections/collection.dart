@@ -3,7 +3,8 @@ part of queries.collections;
 /**
  * The [Collection] class is a wrapper for a [List].
  */
-class Collection<TElement> extends Object with _Collection<TElement>, Enumerable<TElement> {
+class Collection<TElement> extends Object
+    with _Collection<TElement>, Enumerable<TElement> {
   /**
    * Constructs the collection for specified list of items.
    *
@@ -106,7 +107,12 @@ abstract class ICollection<TElement> implements IEnumerable<TElement> {
   bool remove(TElement item);
 }
 
-abstract class _Collection<TElement> implements ICollection<TElement>, IList<TElement>, IReadOnlyCollection<TElement>, IReadOnlyList<TElement> {
+abstract class _Collection<TElement>
+    implements
+        ICollection<TElement>,
+        IList<TElement>,
+        IReadOnlyCollection<TElement>,
+        IReadOnlyList<TElement> {
   List<TElement> _items;
 
   /**

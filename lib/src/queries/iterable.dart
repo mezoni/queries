@@ -5,7 +5,7 @@ class _Iterable<E> extends IterableBase<E> {
 
   _Iterable(Iterator<E> iterator) {
     if (iterator == null) {
-      throw new ArgumentError("iterator: $iterator");
+      throw new ArgumentError.notNull("iterator");
     }
 
     _iterator = iterator;

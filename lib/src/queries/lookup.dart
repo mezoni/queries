@@ -1,6 +1,7 @@
 part of queries;
 
-abstract class ILookup<TKey, TElement> implements IEnumerable<IGrouping<TKey, TElement>> {
+abstract class ILookup<TKey, TElement>
+    implements IEnumerable<IGrouping<TKey, TElement>> {
   int get length;
 
   IEnumerable<TElement> operator [](TKey key);
@@ -8,7 +9,9 @@ abstract class ILookup<TKey, TElement> implements IEnumerable<IGrouping<TKey, TE
   bool containsKey(TKey key);
 }
 
-class Lookup<TKey, TElement> extends Object with Enumerable<IGrouping<TKey, TElement>> implements ILookup<TKey, TElement> {
+class Lookup<TKey, TElement> extends Object
+    with Enumerable<IGrouping<TKey, TElement>>
+    implements ILookup<TKey, TElement> {
   IGrouping<TKey, TElement> _current;
 
   Dictionary<TKey, IGrouping<TKey, TElement>> _groupings;
@@ -35,18 +38,19 @@ class Lookup<TKey, TElement> extends Object with Enumerable<IGrouping<TKey, TEle
       return grouping;
     }
 
-    return new _EmptyIterator<TElement>();
+    return new _Enumerable<TElement>(const <TElement>[]);
   }
 
   /**
    * IQueryable<TResult> applyResultSelector<TResult>(TResult resultSelector(TKey key, IQueryable<TElement> elements)) {
    */
-  IEnumerable<dynamic> applyResultSelector(dynamic resultSelector(TKey key, IEnumerable<TElement> elements)) {
+  IEnumerable<TResult> applyResultSelector<TResult>(
+      TResult resultSelector(TKey key, IEnumerable<TElement> elements)) {
     if (resultSelector == null) {
       throw new ArgumentError("resultSelector: $resultSelector");
     }
 
-    return select((g) => resultSelector(g.key, g));
+    return select<TResult>((g) => resultSelector(g.key, g));
   }
 
   bool containsKey(TKey key) {

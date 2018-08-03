@@ -1,16 +1,19 @@
 part of queries.collections;
 
-class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue> with Enumerable<KeyValuePair<TKey, TValue>> {
+class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue>
+    with Enumerable<KeyValuePair<TKey, TValue>> {
   Dictionary([IEqualityComparer<TKey> comparer]) {
     if (comparer == null) {
       comparer = new EqualityComparer<TKey>();
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
+    _source = new LinkedHashMap(
+        equals: comparer.equals, hashCode: comparer.getHashCode);
   }
 
-  Dictionary.fromDictionary(IDictionary<TKey, TValue> dictionary, [IEqualityComparer<TKey> comparer]) {
+  Dictionary.fromDictionary(IDictionary<TKey, TValue> dictionary,
+      [IEqualityComparer<TKey> comparer]) {
     if (dictionary == null) {
       throw new ArgumentError("dictionary: $dictionary");
     }
@@ -20,13 +23,15 @@ class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue> with Enumerable
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
-    for (var kvp in dictionary) {
+    _source = new LinkedHashMap(
+        equals: comparer.equals, hashCode: comparer.getHashCode);
+    for (var kvp in dictionary.asIterable()) {
       _source[kvp.key] = kvp.value;
     }
   }
 
-  Dictionary.fromMap(Map<TKey, TValue> map, [IEqualityComparer<TKey> comparer]) {
+  Dictionary.fromMap(Map<TKey, TValue> map,
+      [IEqualityComparer<TKey> comparer]) {
     if (map == null) {
       throw new ArgumentError("map: $map");
     }
@@ -36,7 +41,8 @@ class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue> with Enumerable
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
+    _source = new LinkedHashMap(
+        equals: comparer.equals, hashCode: comparer.getHashCode);
     _source.addAll(map);
   }
 
@@ -49,7 +55,9 @@ class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue> with Enumerable
   }
 }
 
-class DictionaryKeyCollection<TKey, TValue> extends Object with Enumerable<TKey> implements ICollection<TKey> {
+class DictionaryKeyCollection<TKey, TValue> extends Object
+    with Enumerable<TKey>
+    implements ICollection<TKey> {
   Dictionary<TKey, TValue> _dictionary;
 
   Iterable<TKey> _items;
@@ -108,7 +116,9 @@ class DictionaryKeyCollection<TKey, TValue> extends Object with Enumerable<TKey>
   }
 }
 
-class DictionaryValueCollection<TKey, TValue> extends Object with Enumerable<TValue> implements ICollection<TValue> {
+class DictionaryValueCollection<TKey, TValue> extends Object
+    with Enumerable<TValue>
+    implements ICollection<TValue> {
   Dictionary<TKey, TValue> _dictionary;
 
   Iterable<TValue> _items;
@@ -167,7 +177,10 @@ class DictionaryValueCollection<TKey, TValue> extends Object with Enumerable<TVa
   }
 }
 
-abstract class IDictionary<TKey, TValue> implements ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>> {
+abstract class IDictionary<TKey, TValue>
+    implements
+        ICollection<KeyValuePair<TKey, TValue>>,
+        IEnumerable<KeyValuePair<TKey, TValue>> {
   IEqualityComparer<TKey> get comparer;
 
   ICollection<TKey> get keys;
@@ -191,7 +204,12 @@ abstract class IDictionary<TKey, TValue> implements ICollection<KeyValuePair<TKe
   Map<TKey, TValue> toMap();
 }
 
-abstract class _Dictionary<TKey, TValue> implements ICollection<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, IReadOnlyDictionary<TKey, TValue> {
+abstract class _Dictionary<TKey, TValue>
+    implements
+        ICollection<KeyValuePair<TKey, TValue>>,
+        IDictionary<TKey, TValue>,
+        IReadOnlyCollection<KeyValuePair<TKey, TValue>>,
+        IReadOnlyDictionary<TKey, TValue> {
   IEqualityComparer<TKey> _comparer;
 
   Map<TKey, TValue> _source;
@@ -289,7 +307,8 @@ abstract class _Dictionary<TKey, TValue> implements ICollection<KeyValuePair<TKe
   }
 
   Map<TKey, TValue> toMap() {
-    var map = new LinkedHashMap(equals: _comparer.equals, hashCode: _comparer.getHashCode);
+    var map = new LinkedHashMap<TKey, TValue>(
+        equals: _comparer.equals, hashCode: _comparer.getHashCode);
     map.addAll(_source);
     return map;
   }

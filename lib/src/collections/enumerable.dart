@@ -1,716 +1,261 @@
 part of queries.collections;
 
-abstract class IEnumerable<TSource> implements HasIterator<TSource> {
-  /**
-   * Returns iterator of sequence.
-   */
+abstract class IEnumerable<TSource> {
+  /// Returns an iterator that iterates through the collection.
   Iterator<TSource> get iterator;
 
-  /**
-   * Returns the accumulated result from all elements by the provided
-   * accumulator function.
-   *
-   * Parameters:
-   *  [TSource] func([TSource] result, [TSource] element)
-   *  Function that produces the accumulated result based on previously
-   *  accumulated result and current value.
-   *
-   *  [TSource] seed
-   *  Initial result of accumulator.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [func] is [:null:]
-   *
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  TSource aggregate(TSource func(TSource accumulator, TSource element), [TSource seed]);
+  /// Applies an accumulator function over a sequence.
+  TSource aggregate(Func2<TSource, TSource, TSource> func);
 
-  /**
-   * Returns [:true:] if all elements matches the specified criteria, or if the
-   * sequence is empty; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  bool all(bool predicate(TSource element));
+  /// Applies an accumulator function over a sequence.
+  TAccumulate aggregate$1<TAccumulate>(
+      TAccumulate seed, Func2<TAccumulate, TSource, TAccumulate> func);
 
-  /**
-   * With specified criteria, returns [:true:] if any element matches the
-   * specified criteria, otherwise returns [:false:].
-   *  OR
-   * Without criteria, returns [:true:] if the sequence contains at least one
-   * element; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   *  Exceptions:
-   */
-  bool any([bool predicate(TSource element)]);
+  /// Applies an accumulator function over a sequence.
+  TResult aggregate$2<TAccumulate, TResult>(
+      TAccumulate seed,
+      Func2<TAccumulate, TSource, TAccumulate> func,
+      Func1<TAccumulate, TResult> resultSelector);
 
-  /**
-   * Returns the [Iterable]<[TSource]> sequence obtained from the current
-   * sequence.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
+  /// Determines whether all elements of a sequence satisfy a condition.
+  bool all(Func1<TSource, bool> predicate);
+
+  /// Determines whether any element of a sequence exists or satisfies a
+  /// condition.
+  bool any([Func1<TSource, bool> predicate]);
+
+  /// Appends a value to the end of the sequence.
+  IEnumerable<TSource> append(TSource element);
+
+  /// Returns the [Iterable]<[TSource]> sequence obtained from the current
   Iterable<TSource> asIterable();
 
-  /**
-   * Returns the [IQueryable]<[TSource]> sequence obtained from the current
-   * sequence.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  IQueryable<TSource> asQueryable();
+  /// Computes the average of a sequence of numeric values.
+  double average([Func1<TSource, num> selector]);
 
-  /**
-   * Returns the sum of values of each element divided by the size of the
-   * sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  num average([num selector(TSource element)]);
+  /// Casts the elements of an [IEnumerable] to the specified type.
+  IEnumerable<TResult> cast<TResult>();
 
-  /**
-   * Performs type conversion of elements in the specified type and returns
-   * the sequence of the specified type.
-   *
-   * Attention:
-   *  Unsupported before the support of generics methods.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   *  [TypeError]
-   *  Error during the type conversion.
-   */
-  IEnumerable<dynamic> cast();
+  /// Concatenates two sequences.
+  IEnumerable<TSource> concat(IEnumerable<TSource> other);
 
-  /**
-   * Returns the result of concatenation of elements of the current and the
-   * other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  IEnumerable<TSource> concat(HasIterator<TSource> other);
-
-  /**
-   * Returns [:true:] if sequence contains the given value; otherwise, [:false:].
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
+  /// Determines whether a sequence contains a specified element.
   bool contains(TSource value, [IEqualityComparer<TSource> comparer]);
 
-  /**
-   * With specified criteria, returns the number of elements that matches a
-   * specified criteria.
-   *  OR
-   * Without criteria, returns the number of elements in seqeunce.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines a set of criteria and determines whether the
-   *  specified element meets those criteria.
-   *
-   * Exceptions:
-   */
-  int count([bool predicate(TSource element)]);
+  /// Returns the number of elements in a sequence.
+  int count([Func1<TSource, bool> predicate]);
 
-  /**
-   * Returns the default value if sequence is empty.
-   *
-   * Parameters:
-   *  [TSource] defaultValue
-   *  Value that specifies the default value.
-   *
-   * Exceptions:
-   */
+  /// Returns the elements, or a default valued singleton collection if the
+  /// sequence is empty.
   IEnumerable<TSource> defaultIfEmpty([TSource defaultValue]);
 
-  /**
-   * Returns the sequence consisting of the elements of the current sequence
-   * without the duplicate elements.
-   *
-   * Parameters:
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   */
+  /// Returns distinct elements from a sequence.
   IEnumerable<TSource> distinct([IEqualityComparer<TSource> comparer]);
 
-  /**
-   * Returns the element at the specified position.
-   *
-   * Parameters:
-   *  [int] index
-   *  Value that specifies the position.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [index] is [:null:]
-   *
-   *  [RangeError]
-   *  [index] out of range
-   */
+  /// Returns the element at a specified index in a sequence.
   TSource elementAt(int index);
 
-  /**
-   * Returns the element at the specified position.
-   *  OR
-   * Returns the default value if the index specifies the position out of range.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [int] index
-   *   Value that specifies the position.
-   *
-   * Exceptions:
-   */
+  /// Returns the element at a specified index in a sequence or a default
+  /// value if the index is out of range.
   TSource elementAtOrDefault(int index);
 
-  /**
-   * Returns the sequence consisting of the elements of the current sequence
-   * except for the elements of the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for exclusion from the current sequence.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  IEnumerable<TSource> except(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]);
+  /// Produces the set difference of two sequences.
+  IEnumerable<TSource> except(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]);
 
-  /**
-   * With specified criteria, returns the first element of the sequence that
-   * matches the specified criteria.
-   *  OR
-   * Without criteria returns the first element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *    OR
-   *  No one element matches specified criteria.
-   */
-  TSource first([bool predicate(TSource element)]);
+  /// Returns the first element of a sequence.
+  TSource first(Func1<TSource, bool> predicate);
 
-  /**
-   * With specified criteria, returns the first element of the sequence that
-   * matches the specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns the first element of the sequence; otherwise,
-   * default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource firstOrDefault([bool predicate(TSource element)]);
+  /// Returns the first element of a sequence, or a default value if no
+  /// element is found.
+  TSource firstOrDefault([Func1<TSource, bool> predicate]);
 
-  /**
-   * Combines the elements into groups of elements according to key and returns
-   * the immutable collection of groups with their key and elements.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IEnumerable<IGrouping<dynamic, dynamic>> groupBy(dynamic keySelector(TSource element), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]);
+  /// Groups the elements of a sequence.
+  IEnumerable<IGrouping<TKey, TSource>> groupBy<TKey>(
+      Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Combines the elements of the current sequence and the inner sequence
-   * according to key and returns the result sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TInner]> inner
-   *  Inner sequence of elements.
-   *
-   *  [TKey] outerKeySelector([TSource] outerElement)
-   *  Function that obtains a key of the element of the outer sequence.
-   *
-   *  [TKey] innerKeySelector([TInner] innerElement)
-   *  Function that obtains a key of the element of the inner sequence.
-   *
-   *  [TResult] resultSelector([TSource] outerElement, [TInner] innerElement)
-   *  Function to support the transform combination of outer and inner elements
-   *  to the certain result.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [inner] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [outerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [innerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [resultSelector] is [:null:]
-   */
-  IEnumerable<dynamic> groupJoin(HasIterator<dynamic> inner, dynamic outerKeySelector(TSource element), dynamic innerKeySelector(dynamic element), dynamic resultSelector(TSource outerElement, IEnumerable<dynamic> innerElements), [IEqualityComparer<dynamic> comparer]);
+  /// Groups the elements of a sequence.
+  IEnumerable<IGrouping<TKey, TElement>> groupBy$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Returns distinct values from the current sequence that are not also found
-   * in the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   *  Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  IEnumerable<TSource> intersect(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]);
+  /// Groups the elements of a sequence.
+  IEnumerable<TResult> groupBy$2<TKey, TResult>(
+      Func1<TSource, TKey> keySelector,
+      Func2<TKey, IEnumerable<TSource>, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Returns the combination of elements of the current (outer) sequence with
-   * the inner sequence based on matching keys.
-   *
-   * Parameters:
-   *  [HasIterator]<[TInner]> inner
-   *  Inner sequence of elements.
-   *
-   *  [TKey] outerKeySelector([TSource] outerElement)
-   *  Function that obtains a key of the element of the outer sequence.
-   *
-   *  [TKey] innerKeySelector([TInner] innerElement)
-   *  Function that obtains a key of the element of the inner sequence.
-   *
-   *  [TResult] resultSelector([TSource] outerElement, [TInner] innerElement)
-   *  Function to support the transform combination of outer and inner elements
-   *  to the certain result.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [inner] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [outerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [innerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [resultSelector] is [:null:]
-   */
-  IEnumerable<dynamic> join(HasIterator<dynamic> inner, dynamic outerKeySelector(TSource outerElement), dynamic innerKeySelector(dynamic innerElement), dynamic resultSelector(TSource outerElement, dynamic innerElement), [IEqualityComparer<dynamic> comparer]);
+  /// Groups the elements of a sequence.
+  IEnumerable<TResult> groupBy$3<TKey, TElement, TResult>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      Func2<TKey, IEnumerable<TElement>, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * With specified criteria, returns the last element of the sequence that
-   * matches the specified criteria.
-   *  OR
-   * Without criteria returns the last element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *    OR
-   *  No one element matches specified criteria.
-   */
-  TSource last([bool predicate(TSource element)]);
+  /// Correlates the elements of two sequences based on key equality, and
+  /// groups the results.
+  IEnumerable<TResult> groupJoin<TInner, TKey, TResult>(
+      IEnumerable<TInner> inner,
+      Func1<TSource, TKey> outerKeySelector,
+      Func1<TInner, TKey> innerKeySelector,
+      Func2<TSource, IEnumerable<TInner>, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * With specified criteria, returns the last element of the sequence that
-   * matches the specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns the last element of the sequence; otherwise,
-   * default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource lastOrDefault([bool predicate(TSource element)]);
+  /// Produces the set intersection of two sequences.
+  IEnumerable<TSource> intersect(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]);
 
-  /**
-   * Returns the maximum value of element in the sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  num max([num selector(TSource element)]);
+  /// Correlates the elements of two sequences based on matching keys.
+  IEnumerable<TResult> join<TInner, TKey, TResult>(
+      IEnumerable<TInner> inner,
+      Func1<TSource, TKey> outerKeySelector,
+      Func1<TInner, TKey> innerKeySelector,
+      Func2<TSource, TInner, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Returns the minimum value of element in the sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  num min([num selector(TSource element)]);
+  /// Returns the last element of a sequence.
+  TSource last([Func1<TSource, bool> predicate]);
 
-  /**
-   * Returns the sequence of specified type that consists only from elements of
-   * specified type.
-   *
-   * Attention:
-   *  Unsupported before the support of generics methods.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  IEnumerable<dynamic> ofType();
+  /// Returns the last element of a sequence, or a default value if no element
+  /// is found.
+  TSource lastOrDefault([Func1<TSource, bool> predicate]);
 
-  /**
-   * Returns the sequence sorted in ascending order according to a key.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [Comparator]<[TSource]> comparer
-   *  Function to support the comparison of elements for ordering.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IOrderedEnumerable<TSource> orderBy(dynamic keySelector(TSource element), [Comparator<dynamic> comparer]);
+  /// Returns the maximum value in a sequence of values.
+  TSource max();
 
-  /**
-   * Returns the sequence sorted in descending order according to a key.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [Comparator]<[TSource]> comparer
-   *  Function to support the comparison of elements for ordering.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IOrderedEnumerable<TSource> orderByDescending(dynamic keySelector(TSource element), [Comparator<dynamic> comparer]);
+  /// Returns the maximum value in a sequence of values.
+  TResult max$1<TResult extends num>(TResult selector(TSource element));
 
-  /**
-   * Applies the transform function to each element and returns the sequence of
-   * those transformed elements.
-   *
-   * Parameters:
-   *  [TResult] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  [selector] is [:null:].
-   *
-   */
-  IEnumerable<dynamic> select(dynamic selector(TSource element));
+  /// Returns the minimum value in a sequence of values.
+  TSource min();
 
-  /**
-   * Combines the results of transformation, that applied to each element, into
-   * the flat sequence of result elements and returns this sequence.
-   *
-   * Parameters:
-   *  [TResult] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  [selector] is [:null:].
-   *
-   */
-  IEnumerable<dynamic> selectMany(IEnumerable<dynamic> selector(TSource element));
+  /// Returns the minimum value in a sequence of values.
+  TResult min$1<TResult extends num>(Func1<TSource, TResult> selector);
 
-  /**
-   * Compares the elements of the current sequence and the other sequence, and
-   * returns [:true:] if all elements equal; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   *  Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  bool sequenceEqual(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]);
+  /// Filters the elements based on a specified type.
+  IEnumerable<TResult> ofType<TResult>();
 
-  /**
-   * With specified criteria, returns the single element that matches the
-   * specified criteria.
-   *  OR
-   * Without criteria, returns single element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *   OR
-   *  With criteria, more than one element matches the specified criteria.
-   *   OR
-   *  Without criteria, the source sequence contains more than one element.
-   */
-  TSource single([bool predicate(TSource element)]);
+  /// Sorts the elements of a sequence in ascending order by using a specified
+  /// comparer.
+  IOrderedEnumerable<TSource> orderBy<TKey>(Func1<TSource, TKey> keySelector,
+      [IComparer<TKey> comparer]);
 
-  /**
-   * With specified criteria, returns the single element that matches the
-   * specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns single element; otherwise, default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource singleOrDefault([bool predicate(TSource element)]);
+  /// Sorts the elements of a sequence in descending order by using a
+  /// specified comparer.
+  IOrderedEnumerable<TSource> orderByDescending<TKey>(
+      Func1<TSource, TKey> keySelector,
+      [IComparer<TKey> comparer]);
 
-  /**
-   * Skips the specified number of elements and returns the rest of the
-   * sequence.
-   *
-   * Parameters:
-   *  [int] count
-   *  The number of elements to skip.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   */
+  /// Adds a value to the beginning of the sequence.
+  IEnumerable<TSource> prepend(TSource element);
+
+  /// Inverts the order of the elements in a sequence.
+  IEnumerable<TSource> reverse();
+
+  /// Projects each element of a sequence into a new form.
+  IEnumerable<TResult> select<TResult>(Func1<TSource, TResult> selector);
+
+  /// Projects each element of a sequence into a new form.
+  IEnumerable<TResult> select2<TResult>(Func2<TSource, int, TResult> selector);
+
+  /// Projects each element of a sequence to an [IEnumerable]<[TResult]> and
+  /// flattens the resulting sequences into one sequence.
+  IEnumerable<TResult> selectMany<TResult>(
+      Func1<TSource, IEnumerable<TResult>> selector);
+
+  /// Projects each element of a sequence to an [IEnumerable]<[TResult]> and
+  /// flattens the resulting sequences into one sequence.
+  IEnumerable<TResult> selectMany$1<TResult>(
+      Func2<TSource, int, IEnumerable<TResult>> selector);
+
+  /// Projects each element of a sequence to an [IEnumerable]<[TResult]> and
+  /// flattens the resulting sequences into one sequence.
+  IEnumerable<TResult> selectMany$2<TCollection, TResult>(
+      Func1<TSource, IEnumerable<TCollection>> collectionSelector,
+      Func2<TSource, TCollection, TResult> resultSelector);
+
+  /// Projects each element of a sequence to an [IEnumerable]<[TResult]> and
+  /// flattens the resulting sequences into one sequence.
+  IEnumerable<TResult> selectMany$3<TCollection, TResult>(
+      Func2<TSource, int, IEnumerable<TCollection>> collectionSelector,
+      Func2<TSource, TCollection, TResult> resultSelector);
+
+  /// Determines whether two sequences are equal according to an equality
+  /// comparer.
+  bool sequenceEqual(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]);
+
+  /// Returns a single, specific element of a sequence.
+  TSource single([Func1<TSource, bool> predicate]);
+
+  /// Returns a single, specific element of a sequence, or a default value if
+  /// that element is not found.
+  TSource singleOrDefault([Func1<TSource, bool> predicate]);
+
+  /// Bypasses a specified number of elements in a sequence and then returns
+  /// the remaining elements.
   IEnumerable<TSource> skip(int count);
 
-  /**
-   * Skips the elements while the elements matches the specified criteria and
-   * returns the rest of the sequence.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  IEnumerable<TSource> skipWhile(bool predicate(TSource element));
+  /// Bypasses elements in a sequence as long as a specified condition is true
+  /// and then returns the remaining elements.
+  IEnumerable<TSource> skipWhile(Func1<TSource, bool> predicate);
 
-  /**
-   * Returns the sum of values of each element in sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [selector] is [:null:]
-   */
-  num sum([num selector(TSource element)]);
+  /// Computes the sum of a sequence of numeric values.
+  TSource sum();
 
-  /**
-   * Takes the specified maximal number of elements and returns the sequence that
-   * consist of these elements.
-   *
-   * Parameters:
-   *  [int] count
-   *  Maximal number of returned elements.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   */
+  /// Computes the sum of a sequence of numeric values.
+  TResult sum$1<TResult extends num>(Func1<TSource, TResult> selector);
+
+  /// Returns a specified number of contiguous elements from the start of a
+  /// sequence.
   IEnumerable<TSource> take(int count);
 
-  /**
-   * Takes the elements while elements matches the specified criteria and
-   * returns the sequence that consist of these elements.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  IEnumerable<TSource> takeWhile(bool predicate(TSource element));
+  /// Returns elements from a sequence as long as a specified condition is
+  /// true, and then skips the remaining elements.
+  IEnumerable<TSource> takeWhile(Func1<TSource, bool> predicate);
 
-  /**
-   * Returns the collection of elements.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  ICollection<TSource> toCollection();
+  /// Returns elements from a sequence as long as a specified condition is
+  /// true, and then skips the remaining elements.
+  IEnumerable<TSource> takeWhile$1(Func2<TSource, int, bool> predicate);
 
-  /**
-   * Returns the collection of keys where each key mapped to
-   * one element.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IDictionary<dynamic, dynamic> toDictionary(dynamic keySelector(TSource source), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]);
+  /// Creates a [Collection]<[TSource]>.
+  Collection<TSource> toCollection();
 
-  /**
-   * Returns the list of elements.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  List<dynamic> toList();
+  /// Creates a [Dictionary]<[TKey], [TValue]>.
+  Dictionary<TKey, TSource> toDictionary<TKey>(Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Returns the immutable collection of groups where each key of the group
-   * mapped to the group of the elements.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  ILookup<dynamic, dynamic> toLookup(dynamic keySelector(TSource source), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]);
+  /// Creates a [Dictionary]<[TKey], [TValue]>.
+  Dictionary<TKey, TElement> toDictionary$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]);
 
-  /**
-   * Returns the sequence that consists of the distinct elements from the current
-   * and the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for combination with the current elements.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  IEnumerable<TSource> union(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]);
+  /// Creates a [HashSet]<[TSource]>.
+  HashSet<TSource> toHashSet([IEqualityComparer<TSource> comparer]);
 
-  /**
-   * Returns the sequence of elements that matches the specified criteria.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  IEnumerable<TSource> where(bool predicate(dynamic element));
+  /// Creates a [List]<[TSource]>.
+  List<TSource> toList({bool growable: true});
+
+  /// Creates a [Lookup]<[TKey], [TElement]>.
+  Lookup<TKey, TSource> toLookup<TKey>(Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]);
+
+  /// Creates a [Lookup]<[TKey], [TElement]>.
+  Lookup<TKey, TElement> toLookup$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]);
+
+  /// Produces the set union of two sequences.
+  IEnumerable<TSource> union(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]);
+
+  /// Filters a sequence of values based on a predicate.
+  IEnumerable<TSource> where(Func1<TSource, bool> predicate);
+
+  /// Filters a sequence of values based on a predicate.
+  IEnumerable<TSource> where$1(Func2<TSource, int, bool> predicate);
 }

@@ -1,9 +1,9 @@
 queries
 =======
 
-Queryable collections for Dart language.
+Enumerable collections for Dart language.
 
-Version 0.0.15
+Version 0.0.17
 
 Inspired by Microsoft LINQ.
 
@@ -15,7 +15,6 @@ Dictionary
 DictionaryKeyCollection  
 DictionaryValueCollection  
 EqualityComparer  
-HasIterator  
 ICollection  
 IDictionary  
 IEnumerable  

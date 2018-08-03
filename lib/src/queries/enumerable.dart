@@ -1,72 +1,74 @@
 part of queries;
 
 abstract class Enumerable<TSource> implements IEnumerable<TSource> {
-  /**
-   * Returns the accumulated result from all elements by the provided
-   * accumulator function.
-   *
-   * Parameters:
-   *  [TSource] func([TSource] result, [TSource] element)
-   *  Function that produces the accumulated result based on previously
-   *  accumulated result and current value.
-   *
-   *  [TSource] seed
-   *  Initial result of accumulator.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [func] is [:null:]
-   *
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  TSource aggregate(TSource func(TSource accumulator, TSource element), [TSource seed]) {
+  TSource aggregate(Func2<TSource, TSource, TSource> func) {
     if (func == null) {
-      throw new ArgumentError("func: $func");
+      throw new ArgumentError.notNull("func");
     }
 
-    TSource result = seed;
-    var iterator = this.iterator;
-    if (!iterator.moveNext()) {
-      if (result == null) {
-        throw new StateError("The source sequence is empty");
-      }
-    } else {
-      if (result == null) {
-        result = iterator.current;
+    var cond = false;
+    TSource result;
+    var it = iterator;
+    while (it.moveNext()) {
+      if (cond) {
+        result = func(result, it.current);
       } else {
-        result = func(result, iterator.current);
+        result = it.current;
+        cond = true;
       }
     }
 
-    while (iterator.moveNext()) {
-      result = func(result, iterator.current);
+    if (!cond) {
+      throw _errorEmptySequence();
     }
 
     return result;
   }
 
-  /**
-   * Returns [:true:] if all elements matches the specified criteria, or if the
-   * sequence is empty; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  bool all(bool predicate(TSource element)) {
-    if (predicate == null) {
-      throw new ArgumentError("predicate: $predicate");
+  TAccumulate aggregate$1<TAccumulate>(
+      TAccumulate seed, Func2<TAccumulate, TSource, TAccumulate> func) {
+    if (func == null) {
+      throw new ArgumentError.notNull("func");
     }
 
-    var iterator = this.iterator;
-    while (iterator.moveNext()) {
-      if (!predicate(iterator.current)) {
+    var acc = seed;
+    var it = iterator;
+    while (it.moveNext()) {
+      acc = func(acc, it.current);
+    }
+
+    return acc;
+  }
+
+  TResult aggregate$2<TAccumulate, TResult>(
+      TAccumulate seed,
+      Func2<TAccumulate, TSource, TAccumulate> func,
+      Func1<TAccumulate, TResult> resultSelector) {
+    if (func == null) {
+      throw new ArgumentError.notNull("func");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    var acc = seed;
+    var it = iterator;
+    while (it.moveNext()) {
+      acc = func(acc, it.current);
+    }
+
+    return resultSelector(acc);
+  }
+
+  bool all(Func1<TSource, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    var it = iterator;
+    while (it.moveNext()) {
+      if (!predicate(it.current)) {
         return false;
       }
     }
@@ -74,32 +76,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return true;
   }
 
-  /**
-   * With specified criteria, returns [:true:] if any element matches the
-   * specified criteria, otherwise returns [:false:].
-   *  OR
-   * Without criteria, returns [:true:] if the sequence contains at least one
-   * element; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   *  Exceptions:
-   */
-  bool any([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
+  bool any([Func1<TSource, bool> predicate]) {
     if (predicate == null) {
-      if (iterator.moveNext()) {
-        return true;
-      } else {
-        return false;
-      }
+      return iterator.moveNext();
     }
 
-    while (iterator.moveNext()) {
-      if (predicate(iterator.current)) {
+    var it = iterator;
+    while (it.moveNext()) {
+      if (predicate(it.current)) {
         return true;
       }
     }
@@ -107,121 +91,98 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return false;
   }
 
-  /**
-   * Returns the [Iterable]<[TSource]> sequence obtained from the current
-   * sequence.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
+  IEnumerable<TSource> append(TSource element) {
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        yield it.current;
+      }
+
+      yield element;
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
   Iterable<TSource> asIterable() {
     return new _Iterable<TSource>(iterator);
   }
 
-  /**
-   * Returns the [IQueryable]<[TSource]> sequence obtained from the current
-   * sequence.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  IQueryable<TSource> asQueryable() {
-    throw new UnimplementedError("asQueryable()");
-  }
+  double average([Func1<TSource, num> selector]) {
+    if (this is! IEnumerable<num>) {
+      _errorUnableToCompute<TSource>("average");
+    }
 
-  /**
-   * Returns the sum of values of each element divided by the size of the
-   * sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  num average([num selector(TSource element)]) {
-    var count = 1;
+    var count = 0;
     num sum;
-    var iterator = this.iterator;
     if (selector == null) {
-      if (!iterator.moveNext()) {
-        throw new StateError("The source sequence is empty");
-      } else {
-        sum = iterator.current as num;
-      }
+      var it = iterator as Iterator<num>;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (current != null) {
+          if (sum == null) {
+            sum = current;
+          }
 
-      while (iterator.moveNext()) {
+          sum += current;
+        }
+
         count++;
-        sum += iterator.current;
       }
     } else {
-      if (!iterator.moveNext()) {
-        throw new StateError("The source sequence is empty");
-      } else {
-        sum = selector(iterator.current);
-      }
+      var it = iterator;
+      while (it.moveNext()) {
+        var value = selector(it.current);
+        if (value != null) {
+          if (sum == null) {
+            sum = value;
+          }
+          sum += value;
+        }
 
-      while (iterator.moveNext()) {
         count++;
-        sum += selector(iterator.current);
       }
     }
 
-    return sum / count;
+    if (count > 0 && sum != null) {
+      return sum / count;
+    }
+
+    return sum as double;
   }
 
-  /**
-   * Performs type conversion of elements in the specified type and returns
-   * the sequence of the specified type.
-   *
-   * Attention:
-   *  Unsupported before the support of generics methods.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   *  [TypeError]
-   *  Error during the type conversion.
-   */
-  Enumerable<dynamic> cast() {
-    return new _CastIterator<dynamic>(this);
+  IEnumerable<TResult> cast<TResult>() {
+    throw new UnimplementedError("cast");
   }
 
-  /**
-   * Returns the result of concatenation of elements of the current and the
-   * other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  Enumerable<TSource> concat(HasIterator<TSource> other) {
-    return new _ConcatIterator<TSource>(this, other);
+  IEnumerable<TSource> concat(IEnumerable<TSource> other) {
+    if (other == null) {
+      throw new ArgumentError.notNull("other");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        yield it.current;
+      }
+
+      it = other.iterator;
+      while (it.moveNext()) {
+        yield it.current;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns [:true:] if sequence contains the given value; otherwise, [:false:].
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
   bool contains(TSource value, [IEqualityComparer<TSource> comparer]) {
     if (comparer == null) {
       comparer = new EqualityComparer<TSource>();
     }
 
-    var iterator = this.iterator;
-    while (iterator.moveNext()) {
-      if (comparer.equals(value, iterator.current)) {
+    var it = iterator;
+    while (it.moveNext()) {
+      if (comparer.equals(it.current, value)) {
         return true;
       }
     }
@@ -229,29 +190,22 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return false;
   }
 
-  /**
-   * With specified criteria, returns the number of elements that matches a
-   * specified criteria.
-   *  OR
-   * Without criteria, returns the number of elements in seqeunce.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines a set of criteria and determines whether the
-   *  specified element meets those criteria.
-   *
-   * Exceptions:
-   */
-  int count([bool predicate(TSource element)]) {
+  int count([Func1<TSource, bool> predicate]) {
     var count = 0;
-    var iterator = this.iterator;
     if (predicate == null) {
-      while (iterator.moveNext()) {
+      if (this is IList<TSource>) {
+        var list = this as IList<TSource>;
+        return list.length;
+      }
+
+      var it = iterator;
+      while (it.moveNext()) {
         count++;
       }
     } else {
-      while (iterator.moveNext()) {
-        if (predicate(iterator.current)) {
+      var it = iterator;
+      while (it.moveNext()) {
+        if (predicate(it.current)) {
           count++;
         }
       }
@@ -260,50 +214,50 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return count;
   }
 
-  /**
-   * Returns the default value if sequence is empty.
-   *
-   * Parameters:
-   *  [TSource] defaultValue
-   *  Value that specifies the default value.
-   *
-   * Exceptions:
-   */
-  Enumerable<TSource> defaultIfEmpty([TSource defaultValue]) {
-    return new _DefaultIfEmptyIterator<TSource>(this, defaultValue);
+  IEnumerable<TSource> defaultIfEmpty([TSource defaultValue]) {
+    Iterable<TSource> generator() sync* {
+      var empty = true;
+      var it = iterator;
+      while (it.moveNext()) {
+        empty = false;
+        yield it.current;
+      }
+
+      if (empty) {
+        yield defaultValue;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns the sequence consisting of the elements of the current sequence
-   * without the duplicate elements.
-   *
-   * Parameters:
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   */
-  Enumerable<TSource> distinct([IEqualityComparer<TSource> comparer]) {
-    return new _DistinctIterator<TSource>(this, comparer);
+  IEnumerable<TSource> distinct([IEqualityComparer<TSource> comparer]) {
+    if (comparer == null) {
+      comparer = new EqualityComparer<TSource>();
+    }
+
+    Iterable<TSource> generator() sync* {
+      var hashSet =
+          new HashSet(equals: comparer.equals, hashCode: comparer.getHashCode);
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (hashSet.add(current)) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns the element at the specified position.
-   *
-   * Parameters:
-   *  [int] index
-   *  Value that specifies the position.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [index] is [:null:]
-   *
-   *  [RangeError]
-   *  [index] out of range
-   */
   TSource elementAt(int index) {
-    if (index == null || index < 0) {
-      throw new RangeError("index: $index");
+    if (index == null) {
+      throw new ArgumentError.notNull("index");
+    }
+
+    if (index < 0) {
+      throw new RangeError.value(index, "index");
     }
 
     if (this is IList<TSource>) {
@@ -312,33 +266,23 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     }
 
     var counter = 0;
-    var iterator = this.iterator;
-    while (iterator.moveNext()) {
+    var it = iterator;
+    while (it.moveNext()) {
       if (counter++ == index) {
-        return iterator.current;
+        return it.current;
       }
     }
 
     throw new RangeError.range(index, 0, counter - 1);
   }
 
-  /**
-   * Returns the element at the specified position.
-   *  OR
-   * Returns the default value if the index specifies the position out of range.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [int] index
-   *   Value that specifies the position.
-   *
-   * Exceptions:
-   */
   TSource elementAtOrDefault(int index) {
     TSource result;
-    if (index == null || index < 0) {
+    if (index == null) {
+      throw new ArgumentError.notNull("index");
+    }
+
+    if (index < 0) {
       return result;
     }
 
@@ -352,96 +296,68 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     }
 
     var counter = 0;
-    var iterator = this.iterator;
-    while (iterator.moveNext()) {
+    var it = iterator;
+    while (it.moveNext()) {
       if (counter++ == index) {
-        return iterator.current;
+        return it.current;
       }
     }
 
     return result;
   }
 
-  /**
-   * Returns the sequence consisting of the elements of the current sequence
-   * except for the elements of the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for exclusion from the current sequence.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  Enumerable<TSource> except(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]) {
-    return new _ExceptIterator<TSource>(this, other, comparer);
+  IEnumerable<TSource> except(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]) {
+    if (other == null) {
+      throw new ArgumentError.notNull("other");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TSource>();
+    }
+
+    Iterable<TSource> generator() sync* {
+      var hashSet = other.toHashSet(comparer);
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (!hashSet.contains(current)) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * With specified criteria, returns the first element of the sequence that
-   * matches the specified criteria.
-   *  OR
-   * Without criteria returns the first element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *    OR
-   *  No one element matches specified criteria.
-   */
-  TSource first([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
+  TSource first([Func1<TSource, bool> predicate]) {
+    var it = iterator;
     if (predicate == null) {
-      if (iterator.moveNext()) {
-        return iterator.current;
+      if (it.moveNext()) {
+        return it.current;
       }
-
     } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
+      while (it.moveNext()) {
+        var current = it.current;
         if (predicate(current)) {
           return current;
         }
       }
     }
 
-    throw new StateError("The source sequence is empty");
+    throw _errorEmptySequence();
   }
 
-  /**
-   * With specified criteria, returns the first element of the sequence that
-   * matches the specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns the first element of the sequence; otherwise,
-   * default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource firstOrDefault([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
+  TSource firstOrDefault([Func1<TSource, bool> predicate]) {
     TSource result;
+    var it = iterator;
     if (predicate == null) {
-      if (iterator.moveNext()) {
-        return iterator.current;
+      if (it.moveNext()) {
+        return it.current;
       }
-
     } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
+      while (it.moveNext()) {
+        var current = it.current;
         if (predicate(current)) {
           return current;
         }
@@ -451,153 +367,267 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
-  /**
-   * Combines the elements into groups of elements according to key and returns
-   * the immutable collection of groups with their key and elements.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  Enumerable<IGrouping<dynamic, dynamic>> groupBy(dynamic keySelector(TSource element), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]) {
-    return new _GroupByIterator<TSource, dynamic, dynamic>(this, keySelector, elementSelector, comparer);
+  IEnumerable<IGrouping<TKey, TSource>> groupBy<TKey>(
+      Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (keySelector == null) {
+      throw new ArgumentError.notNull("keySelector");
+    }
+
+    IGrouping<TKey, TSource> resultSelector(
+        TKey key, IEnumerable<TSource> elements) {
+      return new _Grouping(key, elements);
+    }
+
+    return groupBy$3<TKey, TSource, IGrouping<TKey, TSource>>(
+        keySelector, (e) => e, resultSelector);
   }
 
-  /**
-   * Combines the elements of the current sequence and the inner sequence
-   * according to key and returns the result sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TInner]> inner
-   *  Inner sequence of elements.
-   *
-   *  [TKey] outerKeySelector([TSource] outerElement)
-   *  Function that obtains a key of the element of the outer sequence.
-   *
-   *  [TKey] innerKeySelector([TInner] innerElement)
-   *  Function that obtains a key of the element of the inner sequence.
-   *
-   *  [TResult] resultSelector([TSource] outerElement, [TInner] innerElement)
-   *  Function to support the transform combination of outer and inner elements
-   *  to the certain result.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [inner] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [outerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [innerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [resultSelector] is [:null:]
-   */
-  Enumerable<dynamic> groupJoin(HasIterator<dynamic> inner, dynamic outerKeySelector(TSource outerElement), dynamic innerKeySelector(dynamic innerElement), dynamic resultSelector(TSource outerElement, IEnumerable<dynamic> innerElements), [IEqualityComparer<dynamic> comparer]) {
-    return new _GroupJoinIterator<TSource, dynamic, dynamic, dynamic>(this, inner, outerKeySelector, innerKeySelector, resultSelector, comparer);
+  IEnumerable<IGrouping<TKey, TElement>> groupBy$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (keySelector == null) {
+      throw new ArgumentError.notNull("keySelector");
+    }
+
+    if (elementSelector == null) {
+      throw new ArgumentError.notNull("elementSelector");
+    }
+
+    IGrouping<TKey, TElement> resultSelector(
+        TKey key, IEnumerable<TElement> elements) {
+      return new _Grouping(key, elements);
+    }
+
+    return groupBy$3<TKey, TElement, IGrouping<TKey, TElement>>(
+        keySelector, elementSelector, resultSelector);
   }
 
-  /**
-   * Returns distinct values from the current sequence that are not also found
-   * in the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   *  Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  Enumerable<TSource> intersect(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]) {
-    return new _IntersectIterator<TSource>(this, other, comparer);
+  IEnumerable<TResult> groupBy$2<TKey, TResult>(
+      Func1<TSource, TKey> keySelector,
+      Func2<TKey, IEnumerable<TSource>, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    return groupBy$3<TKey, TSource, TResult>(
+        keySelector, (e) => e, resultSelector);
   }
 
-  /**
-   * Returns the combination of elements of the current (outer) sequence with
-   * the inner sequence based on matching keys.
-   *
-   * Parameters:
-   *  [HasIterator]<[TInner]> inner
-   *  Inner sequence of elements.
-   *
-   *  [TKey] outerKeySelector([TSource] outerElement)
-   *  Function that obtains a key of the element of the outer sequence.
-   *
-   *  [TKey] innerKeySelector([TInner] innerElement)
-   *  Function that obtains a key of the element of the inner sequence.
-   *
-   *  [TResult] resultSelector([TSource] outerElement, [TInner] innerElement)
-   *  Function to support the transform combination of outer and inner elements
-   *  to the certain result.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [inner] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [outerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [innerKeySelector] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [resultSelector] is [:null:]
-   */
-  Enumerable<dynamic> join(HasIterator<dynamic> inner, dynamic outerKeySelector(TSource outer), dynamic innerKeySelector(dynamic inner), dynamic resultSelector(TSource outer, dynamic inner), [IEqualityComparer<dynamic> comparer]) {
-    return new _JoinIterator<TSource, dynamic, dynamic, dynamic>(this, inner, outerKeySelector, innerKeySelector, resultSelector, comparer);
+  IEnumerable<TResult> groupBy$3<TKey, TElement, TResult>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      Func2<TKey, IEnumerable<TElement>, TResult> resultSelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (keySelector == null) {
+      throw new ArgumentError.notNull("keySelector");
+    }
+
+    if (elementSelector == null) {
+      throw new ArgumentError.notNull("elementSelector");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TKey>();
+    }
+
+    Iterable<TResult> generator() sync* {
+      var map = new LinkedHashMap<TKey, List<TElement>>(
+          equals: comparer.equals, hashCode: comparer.getHashCode);
+      var it = iterator;
+      while (it.moveNext()) {
+        var value = it.current;
+        var key = keySelector(value);
+        TElement element;
+        if (elementSelector != null) {
+          element = elementSelector(value);
+        } else {
+          element = value as TElement;
+        }
+
+        var elements = map[key];
+        if (elements == null) {
+          elements = <TElement>[];
+          map[key] = elements;
+        }
+
+        elements.add(element);
+      }
+
+      for (var key in map.keys) {
+        new _Enumerable<TElement>(map[key]);
+        yield resultSelector(key, new _Enumerable<TElement>(map[key]));
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
   }
 
-  /**
-   * With specified criteria, returns the last element of the sequence that
-   * matches the specified criteria.
-   *  OR
-   * Without criteria returns the last element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *    OR
-   *  No one element matches specified criteria.
-   */
-  TSource last([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
+  IEnumerable<TResult> groupJoin<TInner, TKey, TResult>(
+      IEnumerable<TInner> inner,
+      TKey outerKeySelector(TSource element),
+      TKey innerKeySelector(TInner element),
+      TResult resultSelector(
+          TSource outerElement, IEnumerable<TInner> innerElements),
+      [IEqualityComparer<TKey> comparer]) {
+    if (inner == null) {
+      throw new ArgumentError.notNull("inner");
+    }
+
+    if (innerKeySelector == null) {
+      throw new ArgumentError.notNull("innerKeySelector");
+    }
+
+    if (outerKeySelector == null) {
+      throw new ArgumentError.notNull("outerKeySelector");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TKey>();
+    }
+
+    Iterable<TResult> generator() sync* {
+      var dict = new Dictionary<TKey, List<TInner>>(comparer);
+      var it = inner.iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        var key = innerKeySelector(current);
+        var elements = dict[key];
+        if (elements == null) {
+          elements = <TInner>[];
+          dict[key] = elements;
+        }
+
+        elements.add(current);
+      }
+
+      var it2 = iterator;
+      while (it2.moveNext()) {
+        var current = it2.current;
+        var key = outerKeySelector(current);
+        var innerValues = dict[key];
+        if (innerValues != null) {
+          yield resultSelector(current, new _Enumerable<TInner>(innerValues));
+        }
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
+  }
+
+  IEnumerable<TSource> intersect(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]) {
+    if (other == null) {
+      throw new ArgumentError.notNull("other");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TSource>();
+    }
+
+    Iterable<TSource> generator() sync* {
+      var second = other.toHashSet(comparer);
+      var output = new HashSet<TSource>(
+          equals: comparer.equals, hashCode: comparer.getHashCode);
+      var it = second.iterator;
+      while (it.moveNext()) {
+        second.add(it.current);
+      }
+
+      it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (second.contains(current)) {
+          if (output.add(current)) {
+            yield current;
+          }
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  IEnumerable<TResult> join<TInner, TKey, TResult>(
+      IEnumerable<TInner> inner,
+      TKey outerKeySelector(TSource outerElement),
+      TKey innerKeySelector(TInner innerElement),
+      TResult resultSelector(TSource outerElement, TInner innerElement),
+      [IEqualityComparer<TKey> comparer]) {
+    if (inner == null) {
+      throw new ArgumentError.notNull("inner");
+    }
+
+    if (innerKeySelector == null) {
+      throw new ArgumentError.notNull("innerKeySelector");
+    }
+
+    if (outerKeySelector == null) {
+      throw new ArgumentError.notNull("outerKeySelector");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TKey>();
+    }
+
+    Iterable<TResult> generator() sync* {
+      var innerMap = new LinkedHashMap<TKey, List<TInner>>(
+          equals: comparer.equals, hashCode: comparer.getHashCode);
+      var it = inner.iterator;
+      while (it.moveNext()) {
+        var innerValue = it.current;
+        var key = innerKeySelector(innerValue);
+        var elements = innerMap[key];
+        if (elements == null) {
+          elements = <TInner>[];
+          innerMap[key] = elements;
+        }
+
+        elements.add(innerValue);
+      }
+
+      var it2 = iterator;
+      while (it2.moveNext()) {
+        var outerValue = it2.current;
+        var key = outerKeySelector(outerValue);
+        var innerValues = innerMap[key];
+        if (innerValues != null) {
+          for (var innerValue in innerValues) {
+            yield resultSelector(outerValue, innerValue);
+          }
+        }
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
+  }
+
+  TSource last([Func1<TSource, bool> predicate]) {
+    var it = iterator;
     var length = 0;
     TSource result;
     if (predicate == null) {
-      while (iterator.moveNext()) {
+      while (it.moveNext()) {
         length++;
-        result = iterator.current;
+        result = it.current;
       }
-
     } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
+      while (it.moveNext()) {
+        var current = it.current;
         if (predicate(current)) {
           length++;
           result = current;
@@ -606,40 +636,22 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     }
 
     if (length == 0) {
-      throw new StateError("The source sequence is empty");
+      throw _errorEmptySequence();
     }
 
     return result;
   }
 
-  /**
-   * With specified criteria, returns the last element of the sequence that
-   * matches the specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns the last element of the sequence; otherwise,
-   * default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource lastOrDefault([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
+  TSource lastOrDefault([Func1<TSource, bool> predicate]) {
+    var it = iterator;
     TSource result;
     if (predicate == null) {
-      while (iterator.moveNext()) {
-        result = iterator.current;
+      while (it.moveNext()) {
+        result = it.current;
       }
-
     } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
+      while (it.moveNext()) {
+        var current = it.current;
         if (predicate(current)) {
           result = current;
         }
@@ -649,602 +661,697 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
-  /**
-   * Returns the maximum value of element in the sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   */
-  num max([num selector(TSource element)]) {
-    num min;
-    var iterator = this.iterator;
+  TSource max() {
+    return (this as IEnumerable<num>).max$1<num>((e) => e) as TSource;
+  }
+
+  TResult max$1<TResult extends num>(TResult selector(TSource element)) {
     if (selector == null) {
-      if (!iterator.moveNext()) {
-        return min;
+      throw new ArgumentError.notNull("selector");
+    }
+
+    return _computeNullable<TResult>("max", (r, v) => r < v ? v : r, selector);
+  }
+
+  TSource min() {
+    return (this as IEnumerable<num>).min$1<num>((e) => e) as TSource;
+  }
+
+  TResult min$1<TResult extends num>(TResult selector(TSource element)) {
+    return _computeNullable<TResult>("min", (r, v) => r > v ? v : r, selector);
+  }
+
+  IEnumerable<TResult> ofType<TResult>() {
+    throw new UnimplementedError("ofType");
+  }
+
+  IOrderedEnumerable<TSource> orderBy<TKey>(Func1<TSource, TKey> keySelector,
+      [IComparer<TKey> comparer]) {
+    return new _OrderedEnumerable<TSource, TKey>(
+        this, keySelector, null, false, null);
+  }
+
+  IOrderedEnumerable<TSource> orderByDescending<TKey>(
+      Func1<TSource, TKey> keySelector,
+      [IComparer<TKey> comparer]) {
+    return new _OrderedEnumerable<TSource, TKey>(
+        this, keySelector, null, true, null);
+  }
+
+  IEnumerable<TSource> prepend(TSource element) {
+    Iterable<TSource> generator() sync* {
+      yield element;
+      var it = iterator;
+      while (it.moveNext()) {
+        yield it.current;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  IEnumerable<TSource> reverse() {
+    Iterable<TSource> generator() sync* {
+      IList<TSource> list;
+      if (this is IList<TSource>) {
+        list = this as IList<TSource>;
       } else {
-        min = iterator.current as num;
+        list = toCollection();
       }
 
-      while (iterator.moveNext()) {
-        num value = iterator.current as num;
-        if (value != null && value > min) {
-          min = value;
-        }
+      var length = list.length;
+      for (var i = length - 1; i >= 0; i--) {
+        yield list[i];
       }
-    } else {
-      if (!iterator.moveNext()) {
-        return min;
-      } else {
-        min = selector(iterator.current);
-      }
+    }
 
-      while (iterator.moveNext()) {
-        num value = selector(iterator.current);
-        if (value != null && value > min) {
-          min = value;
+    return new _Enumerable<TSource>(generator());
+  }
+
+  IEnumerable<TResult> select<TResult>(Func1<TSource, TResult> selector) {
+    if (selector == null) {
+      throw new ArgumentError.notNull("selector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        yield selector(it.current);
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
+  }
+
+  IEnumerable<TResult> select2<TResult>(Func2<TSource, int, TResult> selector) {
+    if (selector == null) {
+      throw new ArgumentError.notNull("selector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        yield selector(it.current, index++);
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
+  }
+
+  IEnumerable<TResult> selectMany<TResult>(
+      Func1<TSource, IEnumerable<TResult>> selector) {
+    if (selector == null) {
+      throw new ArgumentError.notNull("selector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        var it2 = selector(current).iterator;
+        while (it2.moveNext()) {
+          yield it2.current;
         }
       }
     }
 
-    return min;
+    return new _Enumerable<TResult>(generator());
   }
 
-  /**
-   * Returns the sequence of specified type that consists only from elements of
-   * specified type.
-   *
-   * Attention:
-   *  Unsupported before the support of generics methods.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  num min([num selector(TSource element)]) {
-    num min;
-    var iterator = this.iterator;
+  IEnumerable<TResult> selectMany$1<TResult>(
+      Func2<TSource, int, IEnumerable<TResult>> selector) {
     if (selector == null) {
-      if (!iterator.moveNext()) {
-        return min;
-      } else {
-        min = iterator.current as num;
-      }
+      throw new ArgumentError.notNull("selector");
+    }
 
-      while (iterator.moveNext()) {
-        num value = iterator.current as num;
-        if (value != null && value < min) {
-          min = value;
-        }
-      }
-    } else {
-      if (!iterator.moveNext()) {
-        return min;
-      } else {
-        min = selector(iterator.current);
-      }
-
-      while (iterator.moveNext()) {
-        num value = selector(iterator.current);
-        if (value != null && value < min) {
-          min = value;
+    Iterable<TResult> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        var it2 = selector(current, index++).iterator;
+        while (it2.moveNext()) {
+          yield it2.current;
         }
       }
     }
 
-    return min;
+    return new _Enumerable<TResult>(generator());
   }
 
-  /**
-   * Returns the sequence of specified type that consists only from elements of
-   * specified type.
-   *
-   * Attention:
-   *  Unsupported before the support of generics methods.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
-  Enumerable<dynamic> ofType() {
-    return new _OfTypeIterator<dynamic>(this);
+  IEnumerable<TResult> selectMany$2<TCollection, TResult>(
+      Func1<TSource, IEnumerable<TCollection>> collectionSelector,
+      Func2<TSource, TCollection, TResult> resultSelector) {
+    if (collectionSelector == null) {
+      throw new ArgumentError.notNull("collectionSelector");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        var it2 = collectionSelector(current).iterator;
+        while (it2.moveNext()) {
+          yield resultSelector(current, it2.current);
+        }
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
   }
 
-  /**
-   * Returns the sequence sorted in ascending order according to a key.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [Comparator]<[TSource]> comparer
-   *  Function to support the comparison of elements for ordering.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IOrderedEnumerable<TSource> orderBy(dynamic keySelector(TSource source), [Comparator<dynamic> comparer]) {
-    return new _OrderByIterator<TSource, dynamic>(this, keySelector, false, comparer);
+  IEnumerable<TResult> selectMany$3<TCollection, TResult>(
+      Func2<TSource, int, IEnumerable<TCollection>> collectionSelector,
+      Func2<TSource, TCollection, TResult> resultSelector) {
+    if (collectionSelector == null) {
+      throw new ArgumentError.notNull("collectionSelector");
+    }
+
+    if (resultSelector == null) {
+      throw new ArgumentError.notNull("resultSelector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        var it2 = collectionSelector(current, index++).iterator;
+        while (it2.moveNext()) {
+          yield resultSelector(current, it2.current);
+        }
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
   }
 
-  /**
-   * Returns the sequence sorted in descending order according to a key.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [Comparator]<[TSource]> comparer
-   *  Function to support the comparison of elements for ordering.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  IOrderedEnumerable<TSource> orderByDescending(dynamic keySelector(TSource source), [Comparator<dynamic> comparer]) {
-    return new _OrderByIterator<TSource, dynamic>(this, keySelector, true, comparer);
-  }
+  bool sequenceEqual(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]) {
+    if (other == null) {
+      throw new ArgumentError.notNull("other");
+    }
 
-  /**
-   * Applies the transform function to each element and returns the sequence of
-   * those transformed elements.
-   *
-   * Parameters:
-   *  [TResult] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  [selector] is [:null:].
-   *
-   */
-  Enumerable<dynamic> select(dynamic selector(TSource element)) {
-    return new _SelectIterator<TSource, dynamic>(this, selector);
-  }
-
-  /**
-   * Combines the results of transformation, that applied to each element, into
-   * the flat sequence of result elements and returns this sequence.
-   *
-   * Parameters:
-   *  [TResult] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  [selector] is [:null:].
-   *
-   */
-  Enumerable<dynamic> selectMany(IEnumerable<dynamic> selector(TSource source)) {
-    return new _SelectManyIterator<TSource, dynamic>(this, selector);
-  }
-
-  /**
-   * Compares the elements of the current sequence and the other sequence, and
-   * returns [:true:] if all elements equal; otherwise, [:false:].
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for concatenation with the current sequence.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   *  Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  bool sequenceEqual(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]) {
-    Iterator<TSource> iterator1 = this.iterator;
-    Iterator<TSource> iterator2 = other.iterator;
     if (comparer == null) {
       comparer = new EqualityComparer<TSource>();
     }
 
-    while (iterator1.moveNext()) {
-      if (!iterator2.moveNext()) {
-        return false;
-      }
-
-      if (!comparer.equals(iterator1.current, iterator2.current)) {
-        return false;
+    var it1 = iterator;
+    var it2 = iterator;
+    while (true) {
+      var moved1 = it1.moveNext();
+      var moved2 = it2.moveNext();
+      if (moved1 && moved2) {
+        if (!comparer.equals(it1.current, it2.current)) {
+          return false;
+        }
+      } else {
+        if (moved1 != moved2) {
+          return false;
+        } else {
+          break;
+        }
       }
     }
 
     return true;
   }
 
-  /**
-   * With specified criteria, returns the single element that matches the
-   * specified criteria.
-   *  OR
-   * Without criteria, returns single element.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [StateError]
-   *  The sequence is empty.
-   *   OR
-   *  With criteria, more than one element matches the specified criteria.
-   *   OR
-   *  Without criteria, the source sequence contains more than one element.
-   */
-  TSource single([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
-    var length = 0;
+  TSource single([Func1<TSource, bool> predicate]) {
     TSource result;
+    var it = iterator;
     if (predicate == null) {
-      while (iterator.moveNext()) {
-        result = iterator.current;
-        if (length > 0) {
-          throw new StateError("The source sequence contains more than one element");
-        } else {
-          length++;
-        }
+      if (!it.moveNext()) {
+        throw _errorEmptySequence();
       }
 
+      result = it.current;
+      if (it.moveNext()) {
+        throw _errorMoreThanOneElement();
+      }
     } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
+      var found = false;
+      while (it.moveNext()) {
+        var current = it.current;
         if (predicate(current)) {
-          if (length > 0) {
-            throw new StateError("The source sequence contains more than one element");
-          } else {
-            result = current;
-            length++;
+          if (found) {
+            throw _errorMoreThanOneElement();
           }
-        }
-      }
-    }
 
-    if (length == 0) {
-      throw new StateError("The source sequence is empty");
-    }
-
-    return result;
-  }
-
-  /**
-   * With specified criteria, returns the single element that matches the
-   * specified criteria; otherwise, default value.
-   *  OR
-   * Without criteria, returns single element; otherwise, default value.
-   *
-   * Note:
-   *  Default value for nullable types is [:null:].
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  TSource singleOrDefault([bool predicate(TSource element)]) {
-    var iterator = this.iterator;
-    var length = 0;
-    TSource result;
-    if (predicate == null) {
-      while (iterator.moveNext()) {
-        result = iterator.current;
-        if (length > 0) {
-          throw new StateError("The source sequence contains more than one element");
-        } else {
-          length++;
+          found = true;
+          result = current;
         }
       }
 
-    } else {
-      while (iterator.moveNext()) {
-        var current = iterator.current;
-        if (predicate(current)) {
-          if (length > 0) {
-            throw new StateError("The source sequence contains more than one element");
-          } else {
-            result = current;
-            length++;
-          }
-        }
+      if (!found) {
+        throw _errorEmptySequence();
       }
     }
 
     return result;
   }
 
-  /**
-   * Skips the specified number of elements and returns the rest of the
-   * sequence.
-   *
-   * Parameters:
-   *  [int] count
-   *  The number of elements to skip.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   */
-  Enumerable<TSource> skip(int count) {
-    return new _SkipIterator<TSource>(this, count);
-  }
-
-  /**
-   * Skips the elements while the elements matches the specified criteria and
-   * returns the rest of the sequence.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   */
-  Enumerable<TSource> skipWhile(bool predicate(TSource element)) {
-    return new _SkipWhileIterator<TSource>(this, predicate);
-  }
-
-  /**
-   * Returns the sum of values of each element in sequence.
-   *
-   * Parameters:
-   *  [num] selector([TSource] element)
-   *  Function to support transform elements.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [selector] is [:null:]
-   */
-  num sum([num selector(TSource element)]) {
-    num sum;
-    var iterator = this.iterator;
-    if (selector == null) {
-      if (!iterator.moveNext()) {
-        return sum;
-      } else {
-        sum = iterator.current as num;
+  TSource singleOrDefault([Func1<TSource, bool> predicate]) {
+    TSource result;
+    var it = iterator;
+    if (predicate == null) {
+      if (!it.moveNext()) {
+        return result;
       }
 
-      while (iterator.moveNext()) {
-        sum += iterator.current;
+      result = it.current;
+      if (it.moveNext()) {
+        throw _errorMoreThanOneElement();
       }
     } else {
-      if (!iterator.moveNext()) {
-        return sum;
-      } else {
-        sum = selector(iterator.current);
+      var found = false;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (predicate(current)) {
+          if (found) {
+            throw _errorMoreThanOneElement();
+          }
+
+          found = true;
+          result = current;
+        }
       }
 
-      while (iterator.moveNext()) {
-        sum += selector(iterator.current);
+      if (!found) {
+        return result;
       }
     }
 
-    return sum;
+    return result;
   }
 
-  /**
-   * Takes the specified maximal number of elements and returns the sequence that
-   * consist of these elements.
-   *
-   * Parameters:
-   *  [int] count
-   *  Maximal number of returned elements.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   */
-  Enumerable<TSource> take(int count) {
-    return new _TakeIterator<TSource>(this, count);
+  IEnumerable<TSource> skip(int count) {
+    if (count == null) {
+      throw new ArgumentError.notNull("count");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        if (count-- <= 0) {
+          yield it.current;
+          break;
+        }
+      }
+
+      while (it.moveNext()) {
+        yield it.current;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Takes the elements while elements matches the specified criteria and
-   * returns the sequence that consist of these elements.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  Enumerable<TSource> takeWhile(bool predicate(TSource element)) {
-    return new _TakeWhileIterator<TSource>(this, predicate);
+  IEnumerable<TSource> skipWhile(Func1<TSource, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (!predicate(current)) {
+          yield current;
+          break;
+        }
+      }
+
+      while (it.moveNext()) {
+        yield it.current;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns the collection of elements.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
+  IEnumerable<TSource> skipWhile2(Func2<TSource, int, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (!predicate(current, index++)) {
+          yield current;
+          break;
+        }
+      }
+
+      while (it.moveNext()) {
+        yield it.current;
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  TSource sum() {
+    return (this as IEnumerable<num>).sum$1<num>((e) => e) as TSource;
+  }
+
+  TResult sum$1<TResult extends num>(TResult selector(TSource element)) {
+    return _computeNullable<TResult>("sum", (r, v) => r + v, selector);
+  }
+
+  IEnumerable<TSource> take(int count) {
+    if (count == null) {
+      throw new ArgumentError.notNull("count");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        if (count-- > 0) {
+          yield it.current;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  IEnumerable<TSource> takeWhile(Func1<TSource, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        if (predicate(it.current)) {
+          yield it.current;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  IEnumerable<TSource> takeWhile$1(Func2<TSource, int, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        if (predicate(it.current, index++)) {
+          yield it.current;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
   Collection<TSource> toCollection() {
-    return new Collection(this.toList());
+    return new Collection<TSource>(toList());
   }
 
-  /**
-   * Returns the collection of keys where each key mapped to one element.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  Dictionary<dynamic, dynamic> toDictionary(dynamic keySelector(TSource source), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]) {
+  Dictionary<TKey, TSource> toDictionary<TKey>(Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw new ArgumentError("keySelector: $keySelector");
+      throw new ArgumentError.notNull("keySelector");
     }
 
     if (comparer == null) {
-      comparer = new EqualityComparer<dynamic>();
+      comparer = new EqualityComparer<TKey>();
     }
 
-    var dictionary = new Dictionary<dynamic, dynamic>(comparer);
-    for (var grouping in groupBy(keySelector, elementSelector, comparer)) {
-      dictionary[grouping.key] = grouping.lastOrDefault();
+    var result = new Dictionary<TKey, TSource>(comparer);
+    var it = iterator;
+    while (it.moveNext()) {
+      var current = it.current;
+      var key = keySelector(current);
+      result[key] = current;
     }
 
-    return dictionary;
+    return result;
   }
 
-  /**
-   * Returns the list of elements.
-   *
-   * Parameters:
-   *
-   * Exceptions:
-   */
+  Dictionary<TKey, TElement> toDictionary$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (keySelector == null) {
+      throw new ArgumentError.notNull("keySelector");
+    }
+
+    if (elementSelector == null) {
+      throw new ArgumentError.notNull("elementSelector");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TKey>();
+    }
+
+    var result = new Dictionary<TKey, TElement>(comparer);
+    var it = iterator;
+    while (it.moveNext()) {
+      var current = it.current;
+      var key = keySelector(current);
+      result[key] = elementSelector(current);
+    }
+
+    return result;
+  }
+
+  HashSet<TSource> toHashSet([IEqualityComparer<TSource> comparer]) {
+    if (comparer == null) {
+      comparer = new EqualityComparer<TSource>();
+    }
+
+    var result = new HashSet<TSource>(
+        equals: comparer.equals, hashCode: comparer.getHashCode);
+    result.addAll(asIterable());
+    return result;
+  }
+
   List<TSource> toList({bool growable: true}) {
-    var iterator = this.iterator;
-    var list = <TSource>[];
-    while (iterator.moveNext()) {
-      list.add(iterator.current);
+    if (growable == null) {
+      throw new ArgumentError.notNull("growable");
     }
 
-    if (growable) {
-      return list;
-    }
-
-    var length = list.length;
-    var fixedList = new List<TSource>(length);
-    for (var i = 0; i < length; i++) {
-      fixedList[i] = list[i];
-    }
-
-    return fixedList;
+    return new List<TSource>.from(asIterable(), growable: growable);
   }
 
-  /**
-   * Returns the immutable collection of groups where each key of the group
-   * mapped to the group of the elements.
-   *
-   * Parameters:
-   *  [TKey] keySelector([TSource] source)
-   *  Function that obtains a key of the source element.
-   *
-   *  [TElement] elementSelector([TSource] source)
-   *  Function to support the transform [TSource] element to [TElement] element.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [keySelector] is [:null:]
-   */
-  Lookup<dynamic, dynamic> toLookup(dynamic keySelector(TSource source), [dynamic elementSelector(TSource source), IEqualityComparer<dynamic> comparer]) {
+  Lookup<TKey, TSource> toLookup<TKey>(Func1<TSource, TKey> keySelector,
+      [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw new ArgumentError("keySelector: $keySelector");
+      throw new ArgumentError.notNull("keySelector");
     }
 
     if (comparer == null) {
-      comparer = new EqualityComparer<dynamic>();
+      comparer = new EqualityComparer<TKey>();
     }
 
-    var dictionary = new Dictionary<dynamic, IGrouping<dynamic, dynamic>>(comparer);
-    for (var grouping in groupBy(keySelector, elementSelector, comparer)) {
-      dictionary[grouping.key] = grouping;
+    var dict = new Dictionary<TKey, IGrouping<TKey, TSource>>(comparer);
+    var it = groupBy<TKey>(keySelector, comparer).iterator;
+    while (it.moveNext()) {
+      var current = it.current;
+      dict[current.key] = current;
     }
 
-    return new Lookup<dynamic, dynamic>._internal(dictionary);
+    return new Lookup<TKey, TSource>._internal(dict);
   }
 
-  /**
-   * Returns the sequence that consists of the distinct elements from the current
-   * and the other sequence.
-   *
-   * Parameters:
-   *  [HasIterator]<[TSource]> other
-   *  Sequence for combination with the current elements.
-   *
-   *  [IEqualityComparer]<[TSource]> comparer
-   *  Function to support the comparison of elements for equality.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [other] is [:null:]
-   */
-  Enumerable<TSource> union(HasIterator<TSource> other, [IEqualityComparer<TSource> comparer]) {
-    return new _UnionIterator<TSource>(this, other, comparer);
+  Lookup<TKey, TElement> toLookup$1<TKey, TElement>(
+      Func1<TSource, TKey> keySelector,
+      Func1<TSource, TElement> elementSelector,
+      [IEqualityComparer<TKey> comparer]) {
+    if (keySelector == null) {
+      throw new ArgumentError.notNull("keySelector");
+    }
+
+    if (elementSelector == null) {
+      throw new ArgumentError.notNull("elementSelector");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TKey>();
+    }
+
+    var dict = new Dictionary<TKey, IGrouping<TKey, TElement>>(comparer);
+    var it = groupBy$1<TKey, TElement>(keySelector, elementSelector, comparer)
+        .iterator;
+    while (it.moveNext()) {
+      var current = it.current;
+      dict[current.key] = current;
+    }
+
+    return new Lookup<TKey, TElement>._internal(dict);
   }
 
-  /**
-   * Returns the sequence of elements that matches the specified criteria.
-   *
-   * Parameters:
-   *  [bool] predicate([TSource] element)
-   *  Function that defines criteria and determines whether the specified
-   *  element meets this criteria.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [predicate] is [:null:]
-   */
-  Enumerable<TSource> where(bool predicate(TSource element)) {
-    return new _WhereIterator<TSource>(this, predicate);
+  IEnumerable<TSource> union(IEnumerable<TSource> other,
+      [IEqualityComparer<TSource> comparer]) {
+    if (other == null) {
+      throw new ArgumentError.notNull("other");
+    }
+
+    if (comparer == null) {
+      comparer = new EqualityComparer<TSource>();
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      var hashSet =
+          new HashSet(equals: comparer.equals, hashCode: comparer.getHashCode);
+      while (it.moveNext()) {
+        var current = it.current;
+        if (hashSet.add(current)) {
+          yield current;
+        }
+      }
+
+      it = other.iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (hashSet.add(current)) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns the sequence of integer values in the specified range.
-   *
-   * Parameters:
-   *  [int] start
-   *  Lower bound value.
-   *
-   *  [int] count
-   *  Number of values.
-   *
-   * Exceptions:
-   *  [ArgumentError]
-   *  [start] is [:null:]
-   *
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   *
-   *  [RangeError]
-   *  [start] + [count] - 1 > 0x7fffffff
-   */
-  static Enumerable<dynamic> range(int start, int count) {
-    return new _RangeIterator<dynamic>(start, count);
+  IEnumerable<TSource> where(Func1<TSource, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (predicate(current)) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
   }
 
-  /**
-   * Returns the sequence that consists from specified number of elements.
-   *
-   * Parameters:
-   *  [TElement] element
-   *  Element of sequence.
-   *
-   *  [int] count
-   *  Number of elements.
-   *
-   *  [ArgumentError]
-   *  [count] is [:null:]
-   *   OR
-   *  [count] < 0
-   */
-  static Enumerable<dynamic> repeat(dynamic element, int count) {
-    return new _RepeatIterator<dynamic>(element, count);
+  IEnumerable<TSource> where$1(Func2<TSource, int, bool> predicate) {
+    if (predicate == null) {
+      throw new ArgumentError.notNull("predicate");
+    }
+
+    Iterable<TSource> generator() sync* {
+      var index = 0;
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (predicate(current, index++)) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TSource>(generator());
+  }
+
+  TResult _computeNullable<TResult extends num>(
+      String name,
+      Func2<TResult, TResult, TResult> func,
+      TResult selector(TSource element)) {
+    TResult result;
+    var first = true;
+    var it = iterator;
+    while (it.moveNext()) {
+      var current = it.current;
+      if (current == null) {
+        continue;
+      }
+
+      var value = selector(current);
+      if (result == null) {
+        result = value;
+      }
+
+      if (value != null) {
+        if (!first) {
+          result = func(result, value);          
+        } else {
+          first = false;
+        }        
+      }
+    }
+
+    return result;
+  }
+
+  StateError _errorEmptySequence() {
+    return new StateError("Sequence contains no elements");
+  }
+
+  StateError _errorMoreThanOneElement() {
+    return new StateError("Sequence contains more than one element");
+  }
+
+  StateError _errorUnableToCompute<TResult>(String operation) {
+    return new StateError(
+        "Unable to compute '$operation' of '$TResult' values");
+  }
+
+  /// Returns an empty [IEnumerable]<[TResult]> that has the specified type
+  /// argument.
+  static IEnumerable<TResult> empty<TResult>() {
+    // TODO: Unimplemented "empty";
+    throw new UnimplementedError("empty");
+  }
+
+  /// Generates a sequence of integral numbers within a specified range.
+  static IEnumerable<int> range(int start, int count) {
+    Iterable<int> generator() sync* {
+      for (var i = 0; i < count; i++) {
+        yield start + i;
+      }
+    }
+
+    return new _Enumerable<int>(generator());
+  }
+
+  /// Generates a sequence that contains one repeated value.
+  static IEnumerable<T> repeat<T>(T element, int count) {
+    Iterable<T> generator() sync* {
+      for (var i = 0; i < count; i++) {
+        yield element;
+      }
+    }
+
+    return new _Enumerable<T>(generator());
+  }
+}
+
+class _Enumerable<T> extends Object with Enumerable<T> {
+  Iterable<T> _iterable;
+
+  _Enumerable(this._iterable);
+
+  Iterator<T> get iterator {
+    return _iterable.iterator;
   }
 }
