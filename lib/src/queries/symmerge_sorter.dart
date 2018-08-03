@@ -21,6 +21,7 @@ class _SymmergeSorter<TSource> {
     _symmsort(a, 0, a.length);
   }
 
+  /*
   int _bsearch(List<TSource> a, int l, int r, int p) {
     int mid;
     while (l < r) {
@@ -34,6 +35,7 @@ class _SymmergeSorter<TSource> {
 
     return l;
   }
+  */
 
   _pswap(List<TSource> a, int index, int f, int t, int l) {
     for (l += f; f < l; f++, t++) {

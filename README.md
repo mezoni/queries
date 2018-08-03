@@ -3,7 +3,7 @@ queries
 
 Enumerable collections for Dart language.
 
-Version 0.0.18
+Version 0.1.0
 
 Inspired by Microsoft LINQ.
 

@@ -7,6 +7,10 @@ class KeyValuePair<TKey, TValue> {
 
   KeyValuePair(this.key, this.value);
 
+  int get hashCode {
+    return key.hashCode | value.hashCode;
+  }
+
   bool operator ==(other) {
     if (identical(this, other)) {
       return true;

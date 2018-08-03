@@ -16,8 +16,6 @@ class Lookup<TKey, TElement> extends Object
 
   Dictionary<TKey, IGrouping<TKey, TElement>> _groupings;
 
-  Iterator<IGrouping<TKey, TElement>> _resultIterator;
-
   Lookup._internal(this._groupings);
 
   IGrouping<TKey, TElement> get current {
@@ -38,12 +36,9 @@ class Lookup<TKey, TElement> extends Object
       return grouping;
     }
 
-    return new _Enumerable<TElement>(const <TElement>[]);
+    return new _Enumerable<TElement>(<TElement>[]);
   }
 
-  /**
-   * IQueryable<TResult> applyResultSelector<TResult>(TResult resultSelector(TKey key, IQueryable<TElement> elements)) {
-   */
   IEnumerable<TResult> applyResultSelector<TResult>(
       TResult resultSelector(TKey key, IEnumerable<TElement> elements)) {
     if (resultSelector == null) {
