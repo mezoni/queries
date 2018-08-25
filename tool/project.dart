@@ -5,8 +5,6 @@ import "package:build_tools/build_shell.dart";
 import "package:build_tools/build_tools.dart";
 import "package:build_tools/build_utils.dart";
 import "package:file_utils/file_utils.dart";
-import "package:queries/collections.dart";
-import "package:queries/queries.dart";
 
 const String CHANGELOG_MD = "CHANGELOG.md";
 const String CHANGE_LOG = "tool/change.log";
@@ -40,7 +38,8 @@ void main(List<String> args) {
     template = template.replaceFirst("{{VERSION}}", getVersion());
     var classes = getClasses(Uri.parse("package:queries/collections.dart"));
     template = template.replaceFirst("{{CLASSES}}", classes.join("  \n"));
-    var methods = getMethods(Uri.parse("package:queries/queries.dart"), "Enumerable");
+    var methods =
+        getMethods(Uri.parse("package:queries/queries.dart"), "Enumerable");
     template = template.replaceFirst("{{METHODS}}", methods.join("  \n"));
     classes = getClasses(Uri.parse("package:queries/queries.dart"));
     template = template.replaceFirst("{{OTHER_CLASSES}}", classes.join("  \n"));
@@ -57,7 +56,8 @@ void main(List<String> args) {
     return exec("git", ["add", "--all"]);
   }, description: "git add --all");
 
-  target("git:commit", [CHANGELOG_MD, README_MD, "git:add"], (Target t, Map args) {
+  target("git:commit", [CHANGELOG_MD, README_MD, "git:add"],
+      (Target t, Map args) {
     var message = args["m"];
     if (message == null || message.isEmpty) {
       print("Please, specify the `commit` message with --m option");
@@ -90,9 +90,11 @@ void main(List<String> args) {
     logChanges(message);
   }, description: "log changes, --m message", reusable: true);
 
-  target("prj:changelog", [CHANGELOG_MD], null, description: "generate '$CHANGELOG_MD'", reusable: true);
+  target("prj:changelog", [CHANGELOG_MD], null,
+      description: "generate '$CHANGELOG_MD'", reusable: true);
 
-  target("prj:readme", [README_MD], null, description: "generate '$README_MD'", reusable: true);
+  target("prj:readme", [README_MD], null,
+      description: "generate '$README_MD'", reusable: true);
 
   target("prj:version", [], (Target t, Map args) {
     print("Version: ${getVersion()}");
@@ -119,7 +121,8 @@ String getDescription() {
 
 List<String> getClasses(Uri uri) {
   var result = <String>[];
-  var library = currentMirrorSystem().libraries.values.where((l) => l.uri == uri).first;
+  var library =
+      currentMirrorSystem().libraries.values.where((l) => l.uri == uri).first;
   for (var declarartion in library.declarations.values) {
     if (declarartion is ClassMirror) {
       if (!declarartion.isPrivate) {
@@ -134,7 +137,8 @@ List<String> getClasses(Uri uri) {
 
 List<String> getMethods(Uri uri, String className) {
   var result = <String>[];
-  var library = currentMirrorSystem().libraries.values.where((l) => l.uri == uri).first;
+  var library =
+      currentMirrorSystem().libraries.values.where((l) => l.uri == uri).first;
   var clazz = library.declarations[MirrorSystem.getSymbol(className)];
   for (var declarartion in clazz.declarations.values) {
     if (declarartion is MethodMirror) {

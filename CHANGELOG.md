@@ -1,3 +1,8 @@
+## 0.1.2
+
+- Added definition of `IEnumerable.skipWhile$1()`
+- Fixed problem with numeric types in `Comparer.getDefault()`
+
 ## 0.1.1
 
 - Added example

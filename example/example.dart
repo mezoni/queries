@@ -1024,7 +1024,7 @@ void _testSkip() {
       var query = data.skip(0);
       var result = query.asIterable();
       expect(result, expected);
-    }
+    }    
   });
 }
 
@@ -1042,6 +1042,14 @@ void _testSkipWhile() {
       var data = new Collection<int>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
       var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
       var query = data.skipWhile((e) => false);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<String>(["a", "b", "c"]);
+      var expected = ["b", "c"];
+      var query = data.skipWhile$1((str, i) => str.length > i);
       var result = query.asIterable();
       expect(result, expected);
     }

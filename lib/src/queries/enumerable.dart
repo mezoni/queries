@@ -990,7 +990,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return new _Enumerable<TSource>(generator());
   }
 
-  IEnumerable<TSource> skipWhile2(Func2<TSource, int, bool> predicate) {
+  IEnumerable<TSource> skipWhile$1(Func2<TSource, int, bool> predicate) {
     if (predicate == null) {
       throw new ArgumentError.notNull("predicate");
     }

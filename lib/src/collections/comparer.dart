@@ -13,7 +13,8 @@ abstract class Comparer<T> {
 
   static IComparer<T> getDefault<T>() {
     var test = new _TypeHolder<T>();
-    if (test is _TypeHolder<Comparable<T>>) {
+    if (test is _TypeHolder<Comparable<T>> ||
+        test is _TypeHolder<Comparable<num>>) {
       return new _GenericComparer<T>(Comparable.compare as Func2<T, T, int>);
     }
 

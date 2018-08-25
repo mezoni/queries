@@ -202,6 +202,10 @@ abstract class IEnumerable<TSource> {
   /// and then returns the remaining elements.
   IEnumerable<TSource> skipWhile(Func1<TSource, bool> predicate);
 
+  /// Bypasses elements in a sequence as long as a specified condition is true
+  /// and then returns the remaining elements.
+  IEnumerable<TSource> skipWhile$1(Func2<TSource, int, bool> predicate);
+
   /// Computes the sum of a sequence of numeric values.
   TSource sum();
 

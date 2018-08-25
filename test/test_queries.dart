@@ -1045,6 +1045,14 @@ void _testSkipWhile() {
       var result = query.asIterable();
       expect(result, expected);
     }
+    //
+    {
+      var data = new Collection<String>(["a", "b", "c"]);
+      var expected = ["b", "c"];
+      var query = data.skipWhile$1((str, i) => str.length > i);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
   });
 }
 
