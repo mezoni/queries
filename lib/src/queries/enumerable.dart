@@ -857,7 +857,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     }
 
     var it1 = iterator;
-    var it2 = iterator;
+    var it2 = other.iterator;
     while (true) {
       var moved1 = it1.moveNext();
       var moved2 = it2.moveNext();

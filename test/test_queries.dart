@@ -34,6 +34,7 @@ void main() {
   _testRepeat();
   _testSelect();
   _testSelectMany();
+  _testSequenceEqual();
   _testSingle();
   _testSingleOrDefault();
   _testSkip();
@@ -934,6 +935,26 @@ void _testSelectMany() {
   });
 }
 
+void _testSequenceEqual() {
+  test("SequenceEqual", () {
+    {
+      var data1 = new Collection<int>([0, 1, 2]);
+      var data2 = new Collection<int>([0, 1, 2]);
+      var expected = true;
+      var result = data1.sequenceEqual(data2);
+      expect(result, expected);
+    }
+    //
+    {
+      var data1 = new Collection<int>([0, 1, 2]);
+      var data2 = new Collection<int>([0, 1, 3]);
+      var expected = false;
+      var result = data1.sequenceEqual(data2);
+      expect(result, expected);
+    }
+  });
+}
+
 void _testSingle() {
   test("Single", () {
     {
@@ -1360,7 +1381,7 @@ class Pet {
 
 class PetOwner {
   String name;
+  IEnumerable<Pet> pets;
   PetOwner(this.name);
   String toString() => name;
-  IEnumerable<Pet> pets;
 }

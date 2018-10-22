@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Fixed bug in `Enumerable.sequenceEqual()`
+
 ## 0.1.2
 
 - Added definition of `IEnumerable.skipWhile$1()`
