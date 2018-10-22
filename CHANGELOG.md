@@ -1,3 +1,7 @@
+## 0.1.4
+
+- Improved performance of `Enumerable.sequenceEqual()`
+
 ## 0.1.3
 
 - Fixed bug in `Enumerable.sequenceEqual()`

@@ -952,6 +952,14 @@ void _testSequenceEqual() {
       var result = data1.sequenceEqual(data2);
       expect(result, expected);
     }
+    //
+    {
+      var data1 = new Collection<int>([0, 1, 2]);
+      var data2 = new Collection<int>([0, 1]);
+      var expected = false;
+      var result = data1.sequenceEqual(data2);
+      expect(result, expected);
+    }
   });
 }
 

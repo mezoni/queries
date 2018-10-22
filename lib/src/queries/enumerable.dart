@@ -856,6 +856,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
       comparer = new EqualityComparer<TSource>();
     }
 
+    if (this is IList && other is IList) {
+      var list1 = this as IList;
+      var list2 = other as IList;
+      if (list1.length != list2.length) {
+        return false;
+      }
+    }
+
     var it1 = iterator;
     var it2 = other.iterator;
     while (true) {
