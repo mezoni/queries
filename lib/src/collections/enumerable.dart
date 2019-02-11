@@ -241,7 +241,7 @@ abstract class IEnumerable<TSource> {
   HashSet<TSource> toHashSet([IEqualityComparer<TSource> comparer]);
 
   /// Creates a [List]<[TSource]>.
-  List<TSource> toList({bool growable: true});
+  List<TSource> toList({bool growable = true});
 
   /// Creates a [Lookup]<[TKey], [TElement]>.
   Lookup<TKey, TSource> toLookup<TKey>(Func1<TSource, TKey> keySelector,

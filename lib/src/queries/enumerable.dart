@@ -682,14 +682,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
   IOrderedEnumerable<TSource> orderBy<TKey>(Func1<TSource, TKey> keySelector,
       [IComparer<TKey> comparer]) {
     return new _OrderedEnumerable<TSource, TKey>(
-        this, keySelector, null, false, null);
+        this, keySelector, comparer, false, null);
   }
 
   IOrderedEnumerable<TSource> orderByDescending<TKey>(
       Func1<TSource, TKey> keySelector,
       [IComparer<TKey> comparer]) {
     return new _OrderedEnumerable<TSource, TKey>(
-        this, keySelector, null, true, null);
+        this, keySelector, comparer, true, null);
   }
 
   IEnumerable<TSource> prepend(TSource element) {
@@ -1151,7 +1151,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
-  List<TSource> toList({bool growable: true}) {
+  List<TSource> toList({bool growable = true}) {
     if (growable == null) {
       throw new ArgumentError.notNull("growable");
     }

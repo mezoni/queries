@@ -56,11 +56,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
   }
 
   Iterator<TElement> get iterator {
-    if (_parent == null) {
-      return _orderBy().iterator;
-    } else {
-      return _thenBy().iterator;
-    }
+    return _orderAll().iterator;
   }
 
   IOrderedEnumerable<TElement> createOrderedEnumerable<TKey>(
@@ -82,7 +78,8 @@ class _OrderedEnumerable<TElement, TKey> extends Object
     return createOrderedEnumerable<TKey>(keySelector, comparer, true);
   }
 
-  Iterable<TElement> _orderBy() sync* {
+  List<List<TElement>> _order(List<List<TElement>> data, bool lastLevel) {
+    var result = <List<TElement>>[];
     Comparator<TElement> comparator;
     if (_descending) {
       comparator = (TElement x, TElement y) =>
@@ -93,87 +90,66 @@ class _OrderedEnumerable<TElement, TKey> extends Object
     }
 
     var sorter = new _SymmergeSorter<TElement>(comparator);
-    var result = _source.toList();
-    sorter.sort(result);
-    for (var element in result) {
-      yield element;
+    var numberOfParts = data.length;
+    for (var i = 0; i < numberOfParts; i++) {
+      var elements = data[i];
+      sorter.sort(elements);
+      if (lastLevel) {
+        result.add(elements);
+        continue;
+      }
+
+      var numberOfElements = elements.length;
+      if (numberOfElements == 1) {
+        result.add([elements[0]]);
+        continue;
+      }
+
+      var previous = elements[0];
+      var newElements = [previous];
+      result.add(newElements);
+      for (var j = 1; j < numberOfElements; j++) {
+        var element = elements[j];
+        if (comparator(element, previous) != 0) {
+          newElements = <TElement>[];
+          result.add(newElements);
+        }
+
+        newElements.add(element);
+        previous = element;
+      }
     }
+
+    return result;
   }
 
-  Iterable<TElement> _thenBy() sync* {
-    var result = new List<TElement>();
-    var it = _source.iterator;
-    if (it.moveNext()) {
-      Comparator<TElement> currComparator;
-      TElement current;
-      var group = new List<TElement>();
-      var hasCurrent = false;
-      var length = 1;
-      Comparator<TElement> prevComparator;
-      var previous = it.current;
-      var prevKeySelector = _parent._keySelector;
-      if (_descending) {
-        currComparator = (TElement x, TElement y) =>
-            -_comparer.compare(_keySelector(x), _keySelector(y));
-        prevComparator = (TElement x, TElement y) =>
-            -_parent._comparer.compare(prevKeySelector(x), prevKeySelector(y));
-      } else {
-        currComparator = (TElement x, TElement y) =>
-            _comparer.compare(_keySelector(x), _keySelector(y));
-        prevComparator = (TElement x, TElement y) =>
-            _parent._comparer.compare(prevKeySelector(x), prevKeySelector(y));
-      }
-
-      var sorter = new _SymmergeSorter<TElement>(currComparator);
-      group.add(previous);
-      while (true) {
-        while (it.moveNext()) {
-          current = it.current;
-          if (prevComparator(previous, current) == 0) {
-            group.add(current);
-            previous = current;
-            length++;
-          } else {
-            hasCurrent = true;
-            break;
-          }
-        }
-
-        if (length != 0) {
-          switch (length) {
-            case 1:
-              break;
-            case 2:
-              if (currComparator(group[0], group[1]) > 0) {
-                var swap = group[0];
-                group[0] = group[1];
-                group[1] = swap;
-              }
-
-              break;
-            default:
-              sorter.sort(group);
-          }
-
-          result.addAll(group);
-          if (!hasCurrent) {
-            break;
-          }
-
-          group = <TElement>[];
-          hasCurrent = false;
-          length = 1;
-          group.add(current);
-          previous = current;
-        } else {
-          break;
-        }
-      }
+  Iterable<TElement> _orderAll() sync* {
+    var source = _source.toList();
+    if (source.length == 0) {
+      return;
     }
 
-    var l = result.length;
-    for (var i = 0; i < l; i++) {
-      yield result[i];
+    var data = <List<TElement>>[];
+    data.add(source);
+    var queue = <_OrderedEnumerable<TElement, Object>>[];
+    _OrderedEnumerable<TElement, Object> sequence = this;
+    while (sequence != null) {
+      queue.add(sequence);
+      sequence = sequence._parent;
+    }
+
+    for (var i = queue.length - 1; i >= 0; i--) {
+      var sequence = queue[i];
+      data = sequence._order(data, i == 0);
+    }
+
+    var numberOfParts = data.length;
+    for (var i = 0; i < numberOfParts; i++) {
+      var elements = data[i];
+      var numberOfElements = elements.length;
+      for (var j = 0; j < numberOfElements; j++) {
+        yield elements[j];
+      }
     }
   }
 }

@@ -1,3 +1,8 @@
+## 0.1.5
+
+- Reimplemented `IOrderedEnumerable`
+- Fixed bug in `Enumerable.ordertBy()` and `Enumerable.orderByDescending()`. Thanks to [jnsmith0274](https://github.com/jnsmith0274)
+
 ## 0.1.4
 
 - Improved performance of `Enumerable.sequenceEqual()`

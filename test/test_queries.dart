@@ -1246,7 +1246,71 @@ void _testThenBy() {
       ];
       var query = data
           .orderByDescending<int>((str) => str.length)
-          .thenByDescending((str) => str);
+          .thenByDescending<String>((str) => str);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var johnSmith10 = Person()
+        ..age = 10
+        ..firstName = "John"
+        ..lastName = "Smith";
+      var tomSawyer = Person()
+        ..age = 12
+        ..firstName = "Tom"
+        ..lastName = "Sawyer";
+      var johnSmith60 = Person()
+        ..age = 60
+        ..firstName = "John"
+        ..lastName = "Smith";
+      var jackSparrow = Person()
+        ..age = 40
+        ..firstName = "Jack"
+        ..lastName = "Sparrow";
+      var johnWick = Person()
+        ..age = 50
+        ..firstName = "John"
+        ..lastName = "Wick";
+      var data = new Collection<Person>([
+        johnSmith60,
+        tomSawyer,
+        johnSmith10,
+        jackSparrow,
+        johnWick,
+      ]);
+      var expected = [
+        jackSparrow,
+        johnSmith60,
+        johnSmith10,
+        johnWick,
+        tomSawyer,
+      ];
+      var query = data
+          .orderBy<String>((p) => p.firstName)
+          .thenBy<String>((p) => p.lastName)
+          .thenByDescending<int>((p) => p.age);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var data = new Collection<int>([
+        0,
+      ]);
+      var expected = [
+        0,
+      ];
+      var query =
+          data.orderByDescending<int>((e) => e).thenByDescending<int>((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    {
+      var data = new Collection<int>([]);
+      var expected = <int>[];
+      var query =
+          data.orderByDescending<int>((e) => e).thenByDescending<int>((e) => e);
       var result = query.asIterable();
       expect(result, expected);
     }
@@ -1392,4 +1456,12 @@ class PetOwner {
   IEnumerable<Pet> pets;
   PetOwner(this.name);
   String toString() => name;
+}
+
+class Person {
+  int age;
+
+  String firstName;
+
+  String lastName;
 }
