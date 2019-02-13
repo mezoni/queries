@@ -1,3 +1,7 @@
+## 0.1.6
+
+- Fixed bug in `_OrderedEnumerable.createOrderedEnumerable()`
+
 ## 0.1.5
 
 - Reimplemented `IOrderedEnumerable`

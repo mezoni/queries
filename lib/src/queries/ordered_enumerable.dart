@@ -64,7 +64,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
       IComparer<TKey> comparer,
       bool descending) {
     return new _OrderedEnumerable<TElement, TKey>(
-        this, keySelector, comparer, descending, this);
+        this._source, keySelector, comparer, descending, this);
   }
 
   IOrderedEnumerable<TElement> thenBy<TKey>(Func1<TElement, TKey> keySelector,
@@ -125,7 +125,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
 
   Iterable<TElement> _orderAll() sync* {
     var source = _source.toList();
-    if (source.length == 0) {
+    if (source.isEmpty) {
       return;
     }
 

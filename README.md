@@ -1,11 +1,9 @@
 queries
 =======
 
-Enumerable collections for Dart language.
+Enumerable collections for Dart language (inspired by Microsoft LINQ).
 
-Version 0.1.4
-
-Inspired by Microsoft LINQ.
+Version 0.1.6
 
 **Classes**
 
