@@ -226,7 +226,11 @@ void _testAverage() {
 void _testCast() {
   test("Cast", () {
     {
-      expect(false, !true);
+      var data = Collection<Object>(["mango", "apple", "lemon"]);
+      var expected = ["mango", "apple", "lemon"];
+      var query = data.cast<String>();
+      var result = query.asIterable();
+      expect(result, expected);
     }
   });
 }
@@ -795,7 +799,13 @@ void _testMin() {
 
 void _testOfType() {
   test("OfType", () {
-    expect(false, !true);
+    {
+      var data = Collection([0, "0", 1, "1", 2, "3"]);
+      var expected = [0, 1, 2];
+      var query = data.ofType<int>();
+      var result = query.asIterable();
+      expect(result, expected);
+    }
   });
 }
 

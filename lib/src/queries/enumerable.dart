@@ -152,7 +152,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
   }
 
   IEnumerable<TResult> cast<TResult>() {
-    throw new UnimplementedError("cast");
+    Iterable<TResult> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        yield it.current as TResult;
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
   }
 
   IEnumerable<TSource> concat(IEnumerable<TSource> other) {
@@ -676,7 +683,17 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
   }
 
   IEnumerable<TResult> ofType<TResult>() {
-    throw new UnimplementedError("ofType");
+    Iterable<TResult> generator() sync* {
+      var it = iterator;
+      while (it.moveNext()) {
+        var current = it.current;
+        if (current is TResult) {
+          yield current;
+        }
+      }
+    }
+
+    return new _Enumerable<TResult>(generator());
   }
 
   IOrderedEnumerable<TSource> orderBy<TKey>(Func1<TSource, TKey> keySelector,

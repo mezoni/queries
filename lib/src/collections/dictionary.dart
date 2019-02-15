@@ -275,11 +275,11 @@ abstract class _Dictionary<TKey, TValue>
     return _source.containsKey(key) && _source[key] == item.value;
   }
 
-  // TODO: copyTo()
   void copyTo(List<KeyValuePair<TKey, TValue>> list, int index) {
     throw new UnimplementedError("copyTo()");
   }
 
+  // TODO: copyTo()
   bool remove(KeyValuePair<TKey, TValue> element) {
     if (element == null) {
       throw new ArgumentError("element: $element");
@@ -314,7 +314,7 @@ abstract class _Dictionary<TKey, TValue>
   }
 
   String toString() {
-    return _source.toString();
+    return toMap().toString();
   }
 
   Iterator<KeyValuePair<TKey, TValue>> _getIterator() {

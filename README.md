@@ -3,7 +3,7 @@ queries
 
 Enumerable collections for Dart language (inspired by Microsoft LINQ).
 
-Version 0.1.6
+Version 0.1.7
 
 **Classes**
 
@@ -87,10 +87,7 @@ Enumerable
 IGrouping  
 ILookup  
 IOrderedEnumerable  
-IOrderedQueryable  
-IQueryable  
-Lookup  
-Queryable
+Lookup
 ```
 
 **Other methods**

@@ -1,3 +1,8 @@
+## 0.1.7
+
+- Implemented `Enumerable.cast()`
+- Implemented `Enumerable.ofType()`
+
 ## 0.1.6
 
 - Fixed bug in `_OrderedEnumerable.createOrderedEnumerable()`
