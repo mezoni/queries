@@ -16,6 +16,18 @@ abstract class Comparer<T> {
     if (test is _TypeHolder<Comparable<T>> ||
         test is _TypeHolder<Comparable<num>>) {
       return new _GenericComparer<T>(Comparable.compare as Func2<T, T, int>);
+    } else if (test is _TypeHolder<bool>) {
+      int comparison(bool x, bool y) {
+        if (x == y) {
+          return 0;
+        } else if (!x && y) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }
+
+      return new _GenericComparer<T>(comparison as Func2<T, T, int>);
     }
 
     throw new StateError("Unable to determine default comparer");

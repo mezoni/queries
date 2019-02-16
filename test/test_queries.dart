@@ -826,6 +826,14 @@ void _testOrderBy() {
       var result = query.asIterable();
       expect(result, expected);
     }
+    //
+    {
+      var data = new Collection<bool>([false, true, false, true]);
+      var expected = [false, false, true, true];
+      var query = data.orderBy<bool>((e) => e);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
   });
 }
 
