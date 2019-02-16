@@ -5,17 +5,17 @@ typedef int Comparison<T>(T x, T y);
 abstract class Comparer<T> {
   static IComparer<T> create<T>(Comparison<T> comparison) {
     if (comparison == null) {
-      throw new ArgumentError.notNull("comparison");
+      throw ArgumentError.notNull("comparison");
     }
 
-    return new _GenericComparer(comparison);
+    return _GenericComparer<T>(comparison);
   }
 
   static IComparer<T> getDefault<T>() {
-    var test = new _TypeHolder<T>();
+    var test = _TypeHolder<T>();
     if (test is _TypeHolder<Comparable<T>> ||
         test is _TypeHolder<Comparable<num>>) {
-      return new _GenericComparer<T>(Comparable.compare as Func2<T, T, int>);
+      return _GenericComparer<T>(Comparable.compare as Func2<T, T, int>);
     } else if (test is _TypeHolder<bool>) {
       int comparison(bool x, bool y) {
         if (x == y) {
@@ -27,10 +27,10 @@ abstract class Comparer<T> {
         }
       }
 
-      return new _GenericComparer<T>(comparison as Func2<T, T, int>);
+      return _GenericComparer<T>(comparison as Func2<T, T, int>);
     }
 
-    throw new StateError("Unable to determine default comparer");
+    throw StateError("Unable to determine default comparer");
   }
 }
 

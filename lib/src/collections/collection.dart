@@ -127,7 +127,7 @@ abstract class _Collection<TElement>
    */
   List<TElement> get items {
     if (isReadOnly) {
-      throw new UnsupportedError("items");
+      throw UnsupportedError("items");
     }
 
     return _items;
@@ -187,7 +187,7 @@ abstract class _Collection<TElement>
    */
   void operator []=(int index, TElement item) {
     if (isReadOnly) {
-      throw new UnsupportedError("items=");
+      throw UnsupportedError("items=");
     }
 
     _items[index] = item;
@@ -204,7 +204,7 @@ abstract class _Collection<TElement>
    */
   void add(TElement element) {
     if (isReadOnly) {
-      throw new UnsupportedError("add()");
+      throw UnsupportedError("add()");
     }
 
     _items.add(element);
@@ -221,7 +221,7 @@ abstract class _Collection<TElement>
    */
   void clear() {
     if (isReadOnly) {
-      throw new UnsupportedError("clear()");
+      throw UnsupportedError("clear()");
     }
 
     _items.clear();
@@ -266,17 +266,17 @@ abstract class _Collection<TElement>
    */
   void copyTo(List<TElement> list, int index) {
     if (list == null) {
-      throw new ArgumentError("list: $list");
+      throw ArgumentError.notNull("list");
     }
 
     if (index == null) {
-      throw new ArgumentError("index: $index");
+      throw ArgumentError.notNull("index");
     }
 
     var length = this.length;
     var rest = length - index;
     if (index < 0 || rest <= 0) {
-      throw new RangeError("index: $index");
+      throw RangeError("index: $index");
     }
 
     var end = index + rest;
@@ -321,7 +321,7 @@ abstract class _Collection<TElement>
    */
   void insert(int index, TElement item) {
     if (isReadOnly) {
-      throw new UnsupportedError("insert()");
+      throw UnsupportedError("insert()");
     }
 
     _items.insert(index, item);
@@ -341,7 +341,7 @@ abstract class _Collection<TElement>
    */
   bool remove(TElement item) {
     if (isReadOnly) {
-      throw new UnsupportedError("remove()");
+      throw UnsupportedError("remove()");
     }
 
     return _items.remove(item);
@@ -366,7 +366,7 @@ abstract class _Collection<TElement>
    */
   TElement removeAt(int index) {
     if (isReadOnly) {
-      throw new UnsupportedError("removeAt()");
+      throw UnsupportedError("removeAt()");
     }
 
     return _items.removeAt(index);

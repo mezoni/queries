@@ -34,15 +34,15 @@ class _OrderedEnumerable<TElement, TKey> extends Object
       bool descending,
       this._parent) {
     if (source == null) {
-      throw new ArgumentError.notNull("source");
+      throw ArgumentError.notNull("source");
     }
 
     if (keySelector == null) {
-      throw new ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull("keySelector");
     }
 
     if (descending == null) {
-      throw new ArgumentError.notNull("descending");
+      throw ArgumentError.notNull("descending");
     }
 
     if (comparer == null) {
@@ -63,7 +63,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
       Func1<TElement, TKey> keySelector,
       IComparer<TKey> comparer,
       bool descending) {
-    return new _OrderedEnumerable<TElement, TKey>(
+    return _OrderedEnumerable<TElement, TKey>(
         this._source, keySelector, comparer, descending, this);
   }
 
@@ -89,7 +89,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
           _comparer.compare(_keySelector(x), _keySelector(y));
     }
 
-    var sorter = new _SymmergeSorter<TElement>(comparator);
+    var sorter = _SymmergeSorter<TElement>(comparator);
     var numberOfParts = data.length;
     for (var i = 0; i < numberOfParts; i++) {
       var elements = data[i];

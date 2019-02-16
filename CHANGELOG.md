@@ -1,3 +1,8 @@
+## 0.1.8
+
+- Performed minor code refactorings
+- Implemented `Enumerable.empty()`
+
 ## 0.1.7
 
 - Implemented `Enumerable.cast()`

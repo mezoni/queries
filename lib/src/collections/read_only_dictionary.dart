@@ -21,18 +21,18 @@ class ReadOnlyDictionary<TKey, TValue> extends _ReadOnlyDictionary<TKey, TValue>
     with Enumerable<KeyValuePair<TKey, TValue>> {
   ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     _dictionary = dictionary;
   }
 
   ReadOnlyDictionaryKeyCollection<TKey, TValue> get keys {
-    return new ReadOnlyDictionaryKeyCollection<TKey, TValue>._internal(this);
+    return ReadOnlyDictionaryKeyCollection<TKey, TValue>._internal(this);
   }
 
   ReadOnlyDictionaryValueCollection<TKey, TValue> get values {
-    return new ReadOnlyDictionaryValueCollection<TKey, TValue>._internal(this);
+    return ReadOnlyDictionaryValueCollection<TKey, TValue>._internal(this);
   }
 }
 
@@ -46,7 +46,7 @@ class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object
   ReadOnlyDictionaryKeyCollection._internal(
       ReadOnlyDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     _dictionary = dictionary;
@@ -66,11 +66,11 @@ class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object
   }
 
   void add(TKey item) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
-    throw new UnsupportedError("clear()");
+    throw UnsupportedError("clear()");
   }
 
   bool containsValue(TKey value) {
@@ -86,11 +86,11 @@ class ReadOnlyDictionaryKeyCollection<TKey, TValue> extends Object
 
   // TODO: copyTo()
   void copyTo(List<TKey> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   bool remove(TKey item) {
-    throw new UnsupportedError("remove()");
+    throw UnsupportedError("remove()");
   }
 
   String toString() {
@@ -108,7 +108,7 @@ class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object
   ReadOnlyDictionaryValueCollection._internal(
       ReadOnlyDictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     _dictionary = dictionary;
@@ -128,11 +128,11 @@ class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object
   }
 
   void add(TValue item) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
-    throw new UnsupportedError("clear()");
+    throw UnsupportedError("clear()");
   }
 
   bool containsValue(TValue value) {
@@ -148,11 +148,11 @@ class ReadOnlyDictionaryValueCollection<TKey, TValue> extends Object
 
   // TODO: copyTo()
   void copyTo(List<TValue> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   bool remove(TValue item) {
-    throw new UnsupportedError("remove()");
+    throw UnsupportedError("remove()");
   }
 
   String toString() {
@@ -189,15 +189,15 @@ abstract class _ReadOnlyDictionary<TKey, TValue>
   }
 
   void operator []=(TKey key, TValue value) {
-    throw new UnsupportedError("operator []=");
+    throw UnsupportedError("operator []=");
   }
 
   void add(KeyValuePair<TKey, TValue> element) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
-    throw new UnsupportedError("clear()");
+    throw UnsupportedError("clear()");
   }
 
   bool containsKey(TKey key) {
@@ -210,19 +210,19 @@ abstract class _ReadOnlyDictionary<TKey, TValue>
 
   // TODO: copyTo()
   void copyTo(List<KeyValuePair<TKey, TValue>> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   bool remove(KeyValuePair<TKey, TValue> element) {
-    throw new UnsupportedError("remove()");
+    throw UnsupportedError("remove()");
   }
 
   bool removeKey(TKey key) {
-    throw new UnsupportedError("removeKey()");
+    throw UnsupportedError("removeKey()");
   }
 
   Map<TKey, TValue> toMap() {
-    var map = new LinkedHashMap<TKey, TValue>(
+    var map = LinkedHashMap<TKey, TValue>(
         equals: _dictionary.comparer.equals,
         hashCode: _dictionary.comparer.getHashCode);
     for (var kvp in this.asIterable()) {
@@ -238,14 +238,14 @@ abstract class _ReadOnlyDictionary<TKey, TValue>
 
   Iterator<KeyValuePair<TKey, TValue>> _getIterator() {
     Iterator<TKey> keysIterator;
-    var iterator = new _Iterator<KeyValuePair<TKey, TValue>>();
+    var iterator = _Iterator<KeyValuePair<TKey, TValue>>();
     iterator.action = () {
       while (true) {
         switch (iterator.state) {
           case 1:
             if (keysIterator.moveNext()) {
               var key = keysIterator.current;
-              iterator.result = new KeyValuePair(key, _dictionary[key]);
+              iterator.result = KeyValuePair(key, _dictionary[key]);
               return true;
             }
 

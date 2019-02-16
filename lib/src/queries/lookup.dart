@@ -36,13 +36,13 @@ class Lookup<TKey, TElement> extends Object
       return grouping;
     }
 
-    return new _Enumerable<TElement>(<TElement>[]);
+    return _Enumerable<TElement>(<TElement>[]);
   }
 
   IEnumerable<TResult> applyResultSelector<TResult>(
       TResult resultSelector(TKey key, IEnumerable<TElement> elements)) {
     if (resultSelector == null) {
-      throw new ArgumentError("resultSelector: $resultSelector");
+      throw ArgumentError.notNull("resultSelector");
     }
 
     return select<TResult>((g) => resultSelector(g.key, g));

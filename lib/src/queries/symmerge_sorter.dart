@@ -11,7 +11,7 @@ class _SymmergeSorter<TSource> {
 
   _SymmergeSorter(Comparator<TSource> comparator) {
     if (comparator == null) {
-      throw new ArgumentError.notNull("comparator");
+      throw ArgumentError.notNull("comparator");
     }
 
     _comparator = comparator;

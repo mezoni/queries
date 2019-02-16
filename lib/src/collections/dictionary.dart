@@ -4,27 +4,27 @@ class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue>
     with Enumerable<KeyValuePair<TKey, TValue>> {
   Dictionary([IEqualityComparer<TKey> comparer]) {
     if (comparer == null) {
-      comparer = new EqualityComparer<TKey>();
+      comparer = EqualityComparer<TKey>();
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(
-        equals: comparer.equals, hashCode: comparer.getHashCode);
+    _source =
+        LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
   }
 
   Dictionary.fromDictionary(IDictionary<TKey, TValue> dictionary,
       [IEqualityComparer<TKey> comparer]) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     if (comparer == null) {
-      comparer = new EqualityComparer<TKey>();
+      comparer = EqualityComparer<TKey>();
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(
-        equals: comparer.equals, hashCode: comparer.getHashCode);
+    _source =
+        LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
     for (var kvp in dictionary.asIterable()) {
       _source[kvp.key] = kvp.value;
     }
@@ -33,25 +33,25 @@ class Dictionary<TKey, TValue> extends _Dictionary<TKey, TValue>
   Dictionary.fromMap(Map<TKey, TValue> map,
       [IEqualityComparer<TKey> comparer]) {
     if (map == null) {
-      throw new ArgumentError("map: $map");
+      throw ArgumentError.notNull("map");
     }
 
     if (comparer == null) {
-      comparer = new EqualityComparer<TKey>();
+      comparer = EqualityComparer<TKey>();
     }
 
     _comparer = comparer;
-    _source = new LinkedHashMap(
-        equals: comparer.equals, hashCode: comparer.getHashCode);
+    _source =
+        LinkedHashMap(equals: comparer.equals, hashCode: comparer.getHashCode);
     _source.addAll(map);
   }
 
   DictionaryKeyCollection<TKey, TValue> get keys {
-    return new DictionaryKeyCollection<TKey, TValue>(this);
+    return DictionaryKeyCollection<TKey, TValue>(this);
   }
 
   DictionaryValueCollection<TKey, TValue> get values {
-    return new DictionaryValueCollection<TKey, TValue>(this);
+    return DictionaryValueCollection<TKey, TValue>(this);
   }
 }
 
@@ -64,7 +64,7 @@ class DictionaryKeyCollection<TKey, TValue> extends Object
 
   DictionaryKeyCollection(Dictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     _dictionary = dictionary;
@@ -84,7 +84,7 @@ class DictionaryKeyCollection<TKey, TValue> extends Object
   }
 
   void add(TKey item) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
@@ -104,7 +104,7 @@ class DictionaryKeyCollection<TKey, TValue> extends Object
 
   // TODO: copyTo()
   void copyTo(List<TKey> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   bool remove(TKey item) {
@@ -125,7 +125,7 @@ class DictionaryValueCollection<TKey, TValue> extends Object
 
   DictionaryValueCollection(Dictionary<TKey, TValue> dictionary) {
     if (dictionary == null) {
-      throw new ArgumentError("dictionary: $dictionary");
+      throw ArgumentError.notNull("dictionary");
     }
 
     _dictionary = dictionary;
@@ -145,7 +145,7 @@ class DictionaryValueCollection<TKey, TValue> extends Object
   }
 
   void add(TValue item) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
@@ -165,11 +165,11 @@ class DictionaryValueCollection<TKey, TValue> extends Object
 
   // TODO: copyTo()
   void copyTo(List<TValue> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   bool remove(TValue item) {
-    throw new UnsupportedError("remove()");
+    throw UnsupportedError("remove()");
   }
 
   String toString() {
@@ -236,7 +236,7 @@ abstract class _Dictionary<TKey, TValue>
 
   void operator []=(TKey key, TValue value) {
     if (isReadOnly) {
-      throw new UnsupportedError("operator []=");
+      throw UnsupportedError("operator []=");
     }
 
     _source[key] = value;
@@ -244,11 +244,11 @@ abstract class _Dictionary<TKey, TValue>
 
   void add(KeyValuePair<TKey, TValue> element) {
     if (element == null) {
-      throw new ArgumentError("element: $element");
+      throw ArgumentError.notNull("element");
     }
 
     if (isReadOnly) {
-      throw new UnsupportedError("add()");
+      throw UnsupportedError("add()");
     }
 
     _source[element.key] = element.value;
@@ -256,7 +256,7 @@ abstract class _Dictionary<TKey, TValue>
 
   void clear() {
     if (isReadOnly) {
-      throw new UnsupportedError("clear())");
+      throw UnsupportedError("clear())");
     }
 
     _source.clear();
@@ -268,7 +268,7 @@ abstract class _Dictionary<TKey, TValue>
 
   bool containsValue(KeyValuePair<TKey, TValue> item) {
     if (item == null) {
-      throw new ArgumentError("item: $item");
+      throw ArgumentError.notNull("item");
     }
 
     var key = item.key;
@@ -276,17 +276,17 @@ abstract class _Dictionary<TKey, TValue>
   }
 
   void copyTo(List<KeyValuePair<TKey, TValue>> list, int index) {
-    throw new UnimplementedError("copyTo()");
+    throw UnimplementedError("copyTo()");
   }
 
   // TODO: copyTo()
   bool remove(KeyValuePair<TKey, TValue> element) {
     if (element == null) {
-      throw new ArgumentError("element: $element");
+      throw ArgumentError.notNull("element");
     }
 
     if (isReadOnly) {
-      throw new UnsupportedError("remove())");
+      throw UnsupportedError("remove())");
     }
 
     return removeKey(element.key);
@@ -294,7 +294,7 @@ abstract class _Dictionary<TKey, TValue>
 
   bool removeKey(TKey key) {
     if (isReadOnly) {
-      throw new UnsupportedError("removeKey())");
+      throw UnsupportedError("removeKey())");
     }
 
     var contains = _source.containsKey(key);
@@ -307,7 +307,7 @@ abstract class _Dictionary<TKey, TValue>
   }
 
   Map<TKey, TValue> toMap() {
-    var map = new LinkedHashMap<TKey, TValue>(
+    var map = LinkedHashMap<TKey, TValue>(
         equals: _comparer.equals, hashCode: _comparer.getHashCode);
     map.addAll(_source);
     return map;
@@ -319,14 +319,14 @@ abstract class _Dictionary<TKey, TValue>
 
   Iterator<KeyValuePair<TKey, TValue>> _getIterator() {
     Iterator<TKey> keysIterator;
-    var iterator = new _Iterator<KeyValuePair<TKey, TValue>>();
+    var iterator = _Iterator<KeyValuePair<TKey, TValue>>();
     iterator.action = () {
       while (true) {
         switch (iterator.state) {
           case 1:
             if (keysIterator.moveNext()) {
               var key = keysIterator.current;
-              iterator.result = new KeyValuePair(key, _source[key]);
+              iterator.result = KeyValuePair(key, _source[key]);
               return true;
             }
 

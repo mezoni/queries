@@ -8,7 +8,7 @@ class ReadOnlyCollection<TElement> extends _Collection<TElement>
     with Enumerable<TElement> {
   ReadOnlyCollection(List<TElement> items) {
     if (items == null) {
-      throw new ArgumentError("items: $items");
+      throw ArgumentError.notNull("items");
     }
 
     _items = items;
@@ -19,30 +19,30 @@ class ReadOnlyCollection<TElement> extends _Collection<TElement>
   }
 
   List<TElement> get items {
-    throw new UnsupportedError("items()");
+    throw UnsupportedError("items()");
   }
 
   void operator []=(int index, TElement item) {
-    throw new UnsupportedError("operator []=");
+    throw UnsupportedError("operator []=");
   }
 
   void add(TElement element) {
-    throw new UnsupportedError("add()");
+    throw UnsupportedError("add()");
   }
 
   void clear() {
-    throw new UnsupportedError("clear()");
+    throw UnsupportedError("clear()");
   }
 
   void insert(int index, TElement item) {
-    throw new UnsupportedError("insert()");
+    throw UnsupportedError("insert()");
   }
 
   bool remove(TElement item) {
-    throw new UnsupportedError("remove()");
+    throw UnsupportedError("remove()");
   }
 
   TElement removeAt(int index) {
-    throw new UnsupportedError("removeAt()");
+    throw UnsupportedError("removeAt()");
   }
 }
