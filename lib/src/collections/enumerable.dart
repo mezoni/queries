@@ -262,4 +262,9 @@ abstract class IEnumerable<TSource> {
 
   /// Filters a sequence of values based on a predicate.
   IEnumerable<TSource> where$1(Func2<TSource, int, bool> predicate);
+
+  /// Applies a specified function to the corresponding elements of two
+  /// sequences, producing a sequence of the results
+  IEnumerable zip<TSecond, TResult>(IEnumerable<TSecond> second,
+      Func2<TSource, TSecond, TResult> resultSelector);
 }

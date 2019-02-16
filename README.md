@@ -3,7 +3,7 @@ queries
 
 Enumerable collections for Dart language (inspired by Microsoft LINQ).
 
-Version 0.1.8
+Version 0.1.9
 
 **Classes**
 
@@ -78,6 +78,7 @@ toList
 toLookup  
 union  
 where
+zip
 ```
 
 **Other classes**

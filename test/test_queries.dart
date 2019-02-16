@@ -49,6 +49,7 @@ void main() {
   _testToLookup();
   _testUnion();
   _testWhere();
+  _testZip();
 }
 
 var petOwners = Collection([
@@ -1436,6 +1437,23 @@ void _testWhere() {
       var data = Collection([0, 1, 2, 3, 4, 3, 2, 1, 0]);
       var expected = [0, 1, 2, 3, 4];
       var query = data.where$1((e, i) => e == i);
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });
+}
+
+void _testZip() {
+  test("Zip", () {
+    {
+      var data1 = Collection([0, 1, 2, 3]);
+      var data2 = Collection(["0", "1", "2"]);
+      var expected = [
+        [0, "0"],
+        [1, "1"],
+        [2, "2"]
+      ];
+      var query = data1.zip(data2, (e1, e2) => [e1, e2]);
       var result = query.asIterable();
       expect(result, expected);
     }

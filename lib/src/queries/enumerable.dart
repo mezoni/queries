@@ -1293,6 +1293,27 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  IEnumerable zip<TSecond, TResult>(IEnumerable<TSecond> second,
+      Func2<TSource, TSecond, TResult> resultSelector) {
+    if (second == null) {
+      throw ArgumentError.notNull("second");
+    }
+
+    if (resultSelector == null) {
+      throw ArgumentError.notNull("resultSelector");
+    }
+
+    Iterable<TResult> generator() sync* {
+      var it1 = iterator;
+      var it2 = second.iterator;
+      while (it1.moveNext() && it2.moveNext()) {
+        yield resultSelector(it1.current, it2.current);
+      }
+    }
+
+    return _Enumerable<TResult>(generator());
+  }
+
   TResult _computeNullable<TResult extends num>(
       String name,
       Func2<TResult, TResult, TResult> func,

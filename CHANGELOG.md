@@ -1,5 +1,9 @@
 ## 0.1.8
 
+- Implemented `Enumerable.zip()`
+
+## 0.1.8
+
 - Performed minor code refactorings
 - Implemented `Enumerable.empty()`
 
