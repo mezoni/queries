@@ -14,14 +14,14 @@ abstract class IOrderedEnumerable<TElement> implements IEnumerable<TElement> {
       [IComparer<TKey> comparer]);
 }
 
-class _OrderedEnumerable<TElement, TKey> extends Object
+class _OrderedEnumerable<TElement, TSortKey> extends Object
     with Enumerable<TElement>
     implements IOrderedEnumerable<TElement> {
-  IComparer<TKey> _comparer;
+  IComparer<TSortKey> _comparer;
 
   bool _descending;
 
-  Func1<TElement, TKey> _keySelector;
+  Func1<TElement, TSortKey> _keySelector;
 
   _OrderedEnumerable<TElement, Object> _parent;
 
@@ -29,8 +29,8 @@ class _OrderedEnumerable<TElement, TKey> extends Object
 
   _OrderedEnumerable(
       IEnumerable<TElement> source,
-      Func1<TElement, TKey> keySelector,
-      IComparer<TKey> comparer,
+      Func1<TElement, TSortKey> keySelector,
+      IComparer<TSortKey> comparer,
       bool descending,
       this._parent) {
     if (source == null) {
@@ -46,7 +46,7 @@ class _OrderedEnumerable<TElement, TKey> extends Object
     }
 
     if (comparer == null) {
-      comparer = Comparer.getDefault<TKey>();
+      comparer = Comparer.getDefault<TSortKey>();
     }
 
     _comparer = comparer;

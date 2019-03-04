@@ -364,7 +364,7 @@ void _testElementAtOrDefault() {
     //
     {
       var data = Collection([]);
-      var expected = null;
+      var expected;
       var result = data.elementAtOrDefault(5);
       expect(result, expected);
     }
@@ -440,21 +440,21 @@ void _testFirstOrDefault() {
     //
     {
       var data = Collection([]);
-      var expected = null;
+      var expected;
       var result = data.firstOrDefault();
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
-      var expected = null;
+      var expected;
       var result = data.firstOrDefault((e) => e > 0);
       expect(result, expected);
     }
     //
     {
       var data = Collection([0, 1]);
-      var expected = null;
+      var expected;
       var result = data.firstOrDefault((e) => e > 1);
       expect(result, expected);
     }
@@ -648,21 +648,21 @@ void _testLastOrDefault() {
     //
     {
       var data = Collection([]);
-      var expected = null;
+      var expected;
       var result = data.lastOrDefault();
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
-      var expected = null;
+      var expected;
       var result = data.lastOrDefault((e) => e > 0);
       expect(result, expected);
     }
     //
     {
       var data = Collection([0, 1]);
-      var expected = null;
+      var expected;
       var result = data.lastOrDefault((e) => e > 1);
       expect(result, expected);
     }
@@ -702,28 +702,28 @@ void _testMax() {
     {
       var data = Collection(<int>[]);
       var result = data.max();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
       var result = data.max$1((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.max();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.max$1((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
   });
@@ -762,28 +762,28 @@ void _testMin() {
     {
       var data = Collection(<int>[]);
       var result = data.min();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
       var result = data.min$1((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.min();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.min$1((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
   });
@@ -1032,14 +1032,14 @@ void _testSingleOrDefault() {
     //
     {
       var data = Collection([0, 10, 20, 30]);
-      var expected = null;
+      var expected;
       var result = data.singleOrDefault((e) => e > 100);
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
-      var expected = null;
+      var expected;
       var result = data.singleOrDefault((e) => e > 10 && e < 30);
       expect(result, expected);
     }
@@ -1127,28 +1127,28 @@ void _testSum() {
     {
       var data = Collection(<int>[]);
       var result = data.sum();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[]);
       var result = data.sum$1((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.sum();
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
     //
     {
       var data = Collection(<int>[null]);
       var result = data.sum$1<int>((e) => e);
-      var expected = null;
+      var expected;
       expect(result, expected);
     }
   });

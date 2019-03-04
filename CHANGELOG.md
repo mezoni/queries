@@ -1,4 +1,8 @@
-## 0.1.8
+## 0.1.10
+
+- The source code has been modified in accordance with Google’s guidelines about the effectiveness of the Dart language
+
+## 0.1.9
 
 - Implemented `Enumerable.zip()`
 

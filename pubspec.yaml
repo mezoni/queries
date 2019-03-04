@@ -1,5 +1,5 @@
 name: queries
-version: 0.1.9
+version: 0.1.10
 author: Andrew Mezoni <andrew.mezoni@gmail.com>
 description: Enumerable collections for Dart language (inspired by Microsoft LINQ).
 homepage: https://github.com/mezoni/queries
@@ -8,5 +8,4 @@ environment:
 dependencies:
   function_types: '>=0.0.1 <=1.0.0'
 dev_dependencies:  
-  #test: ^1.5.2
-  test: any
+  test: ^1.5.3  

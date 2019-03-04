@@ -10,7 +10,6 @@ part 'src/collections/comparer.dart';
 part 'src/collections/dictionary.dart';
 part 'src/collections/enumerable.dart';
 part 'src/collections/equality_comparer.dart';
-part 'src/collections/iterator.dart';
 part 'src/collections/key_value_pair.dart';
 part 'src/collections/list.dart';
 part 'src/collections/read_only_collection.dart';

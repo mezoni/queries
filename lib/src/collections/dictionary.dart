@@ -223,7 +223,16 @@ abstract class _Dictionary<TKey, TValue>
   }
 
   Iterator<KeyValuePair<TKey, TValue>> get iterator {
-    return _getIterator();
+    Iterable<KeyValuePair<TKey, TValue>> generator() sync* {
+      var it = _source.keys.iterator;
+      while (it.moveNext()) {
+        var key = it.current;
+        yield KeyValuePair(key, _source[key]);
+        ;
+      }
+    }
+
+    return generator().iterator;
   }
 
   int get length {
@@ -315,34 +324,5 @@ abstract class _Dictionary<TKey, TValue>
 
   String toString() {
     return toMap().toString();
-  }
-
-  Iterator<KeyValuePair<TKey, TValue>> _getIterator() {
-    Iterator<TKey> keysIterator;
-    var iterator = _Iterator<KeyValuePair<TKey, TValue>>();
-    iterator.action = () {
-      while (true) {
-        switch (iterator.state) {
-          case 1:
-            if (keysIterator.moveNext()) {
-              var key = keysIterator.current;
-              iterator.result = KeyValuePair(key, _source[key]);
-              return true;
-            }
-
-            keysIterator = null;
-            iterator.state = -1;
-            return false;
-          case 0:
-            keysIterator = _source.keys.iterator;
-            iterator.state = 1;
-            break;
-          default:
-            return false;
-        }
-      }
-    };
-
-    return iterator;
   }
 }
