@@ -243,5 +243,5 @@ abstract class _ReadOnlyDictionary<TKey, TValue>
 
   String toString() {
     return _dictionary.toString();
-  }  
+  }
 }
