@@ -1,3 +1,7 @@
+## 0.1.11
+
+- Added `CustomEqualityComparer<T>`
+
 ## 0.1.10
 
 - The source code has been modified in accordance with Google’s guidelines about the effectiveness of the Dart language

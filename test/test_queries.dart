@@ -327,6 +327,22 @@ void _testDistinct() {
       var result = query.asIterable();
       expect(result, expected);
     }
+    //
+    {
+      var data = Collection([
+        {'id': 'a'},
+        {'id': 'b'},
+        {'id': 'a'},
+      ]);
+      var expected = [
+        {'id': 'a'},
+        {'id': 'b'},
+      ];
+      var query = data.distinct(CustomEqualityComparer(
+          (a, b) => a['id'] == b['id'], (a) => a.length));
+      var result = query.asIterable();
+      expect(result, expected);
+    }
   });
 }
 
