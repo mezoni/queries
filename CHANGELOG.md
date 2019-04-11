@@ -1,3 +1,7 @@
+## 0.1.12
+
+- Fixed bug in `Enumerable.groupJoin()`
+
 ## 0.1.11
 
 - Added `CustomEqualityComparer<T>`

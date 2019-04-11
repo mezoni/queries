@@ -517,9 +517,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
         var current = it2.current;
         var key = outerKeySelector(current);
         var innerValues = dict[key];
-        if (innerValues != null) {
-          yield resultSelector(current, _Enumerable<TInner>(innerValues));
+        if (innerValues == null) {
+          innerValues = <TInner>[];
         }
+
+        yield resultSelector(current, _Enumerable<TInner>(innerValues));
       }
     }
 
