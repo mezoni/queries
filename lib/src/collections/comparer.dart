@@ -1,11 +1,11 @@
 part of queries.collections;
 
-typedef int Comparison<T>(T x, T y);
+typedef Comparison<T> = int Function(T x, T y);
 
 abstract class Comparer<T> {
   static IComparer<T> create<T>(Comparison<T> comparison) {
     if (comparison == null) {
-      throw ArgumentError.notNull("comparison");
+      throw ArgumentError.notNull('comparison');
     }
 
     return _GenericComparer<T>(comparison);
@@ -30,7 +30,7 @@ abstract class Comparer<T> {
       return _GenericComparer<T>(comparison as Func2<T, T, int>);
     }
 
-    throw StateError("Unable to determine default comparer");
+    throw StateError('Unable to determine default comparer');
   }
 }
 
@@ -43,6 +43,7 @@ class _GenericComparer<T> implements IComparer<T> {
 
   _GenericComparer(this.comparison);
 
+  @override
   int compare(T x, T y) {
     if (x == null || y == null) {
       if (y == null && x == null) {

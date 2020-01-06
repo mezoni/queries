@@ -7,10 +7,12 @@ class KeyValuePair<TKey, TValue> {
 
   KeyValuePair(this.key, this.value);
 
+  @override
   int get hashCode {
     return key.hashCode | value.hashCode;
   }
 
+  @override
   bool operator ==(other) {
     if (identical(this, other)) {
       return true;
@@ -23,7 +25,8 @@ class KeyValuePair<TKey, TValue> {
     return false;
   }
 
+  @override
   String toString() {
-    return "$key : $value";
+    return '$key : $value';
   }
 }

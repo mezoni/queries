@@ -5,11 +5,12 @@ class _Iterable<E> extends IterableBase<E> {
 
   _Iterable(Iterator<E> iterator) {
     if (iterator == null) {
-      throw ArgumentError.notNull("iterator");
+      throw ArgumentError.notNull('iterator');
     }
 
     _iterator = iterator;
   }
 
+  @override
   Iterator<E> get iterator => _iterator;
 }

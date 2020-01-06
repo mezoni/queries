@@ -7,7 +7,7 @@ abstract class IGrouping<TKey, TElement> implements IEnumerable<TElement> {
 class _Grouping<TKey, TElement> extends Object
     with Enumerable<TElement>
     implements IGrouping<TKey, TElement> {
-  IEnumerable<TElement> _elements;
+  final IEnumerable<TElement> _elements;
 
   TKey _key;
 
@@ -15,9 +15,11 @@ class _Grouping<TKey, TElement> extends Object
     _key = key;
   }
 
+  @override
   Iterator<TElement> get iterator {
     return _elements.iterator;
   }
 
+  @override
   TKey get key => _key;
 }

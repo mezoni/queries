@@ -126,7 +126,7 @@ abstract class IEnumerable<TSource> {
   TSource max();
 
   /// Returns the maximum value in a sequence of values.
-  TResult max$1<TResult extends num>(TResult selector(TSource element));
+  TResult max$1<TResult extends num>(TResult Function(TSource element) selector);
 
   /// Returns the minimum value in a sequence of values.
   TSource min();

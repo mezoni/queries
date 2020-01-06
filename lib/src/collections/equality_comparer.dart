@@ -19,16 +19,20 @@ class CustomEqualityComparer<T> implements IEqualityComparer<T> {
     _getHashCode = getHashCode;
   }
 
+  @override
   bool equals(T a, T b) => _equals(a, b);
 
+  @override
   int getHashCode(T object) => _getHashCode(object);
 }
 
 class EqualityComparer<T> implements IEqualityComparer<T> {
+  @override
   bool equals(T a, T b) {
     return a == b;
   }
 
+  @override
   int getHashCode(T object) {
     return object.hashCode;
   }

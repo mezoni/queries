@@ -11,7 +11,7 @@ class _SymmergeSorter<TSource> {
 
   _SymmergeSorter(Comparator<TSource> comparator) {
     if (comparator == null) {
-      throw ArgumentError.notNull("comparator");
+      throw ArgumentError.notNull('comparator');
     }
 
     _comparator = comparator;
@@ -37,7 +37,7 @@ class _SymmergeSorter<TSource> {
   }
   */
 
-  _pswap(List<TSource> a, int index, int f, int t, int l) {
+  void _pswap(List<TSource> a, int index, int f, int t, int l) {
     for (l += f; f < l; f++, t++) {
       var temp = a[index + f];
       a[index + f] = a[index + t];
@@ -112,9 +112,9 @@ class _SymmergeSorter<TSource> {
     }
   }
 
-  _symmsort(List<TSource> a, int f, int n) {
+  void _symmsort(List<TSource> a, int f, int n) {
     if (n - f > 1) {
-      int m = (f + n) >> 1;
+      var m = (f + n) >> 1;
       _symmsort(a, f, m);
       _symmsort(a, m, n);
       _symmerge(a, f, m, n);

@@ -1,9 +1,10 @@
 part of queries;
 
 abstract class Enumerable<TSource> implements IEnumerable<TSource> {
+  @override
   TSource aggregate(Func2<TSource, TSource, TSource> func) {
     if (func == null) {
-      throw ArgumentError.notNull("func");
+      throw ArgumentError.notNull('func');
     }
 
     var cond = false;
@@ -25,10 +26,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   TAccumulate aggregate$1<TAccumulate>(
       TAccumulate seed, Func2<TAccumulate, TSource, TAccumulate> func) {
     if (func == null) {
-      throw ArgumentError.notNull("func");
+      throw ArgumentError.notNull('func');
     }
 
     var acc = seed;
@@ -40,16 +42,17 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return acc;
   }
 
+  @override
   TResult aggregate$2<TAccumulate, TResult>(
       TAccumulate seed,
       Func2<TAccumulate, TSource, TAccumulate> func,
       Func1<TAccumulate, TResult> resultSelector) {
     if (func == null) {
-      throw ArgumentError.notNull("func");
+      throw ArgumentError.notNull('func');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     var acc = seed;
@@ -61,9 +64,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return resultSelector(acc);
   }
 
+  @override
   bool all(Func1<TSource, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     var it = iterator;
@@ -76,6 +80,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return true;
   }
 
+  @override
   bool any([Func1<TSource, bool> predicate]) {
     if (predicate == null) {
       return iterator.moveNext();
@@ -91,6 +96,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return false;
   }
 
+  @override
   IEnumerable<TSource> append(TSource element) {
     Iterable<TSource> generator() sync* {
       var it = iterator;
@@ -104,13 +110,15 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   Iterable<TSource> asIterable() {
     return _Iterable<TSource>(iterator);
   }
 
+  @override
   double average([Func1<TSource, num> selector]) {
     if (this is! IEnumerable<num>) {
-      _errorUnableToCompute<TSource>("average");
+      _errorUnableToCompute<TSource>('average');
     }
 
     var count = 0;
@@ -120,10 +128,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
       while (it.moveNext()) {
         var current = it.current;
         if (current != null) {
-          if (sum == null) {
-            sum = current;
-          }
-
+          sum ??= current;
           sum += current;
         }
 
@@ -134,9 +139,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
       while (it.moveNext()) {
         var value = selector(it.current);
         if (value != null) {
-          if (sum == null) {
-            sum = value;
-          }
+          sum ??= value;
           sum += value;
         }
 
@@ -151,6 +154,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return sum as double;
   }
 
+  @override
   IEnumerable<TResult> cast<TResult>() {
     Iterable<TResult> generator() sync* {
       var it = iterator;
@@ -162,9 +166,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TSource> concat(IEnumerable<TSource> other) {
     if (other == null) {
-      throw ArgumentError.notNull("other");
+      throw ArgumentError.notNull('other');
     }
 
     Iterable<TSource> generator() sync* {
@@ -182,11 +187,9 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   bool contains(TSource value, [IEqualityComparer<TSource> comparer]) {
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     var it = iterator;
     while (it.moveNext()) {
       if (comparer.equals(it.current, value)) {
@@ -197,6 +200,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return false;
   }
 
+  @override
   int count([Func1<TSource, bool> predicate]) {
     var count = 0;
     if (predicate == null) {
@@ -221,6 +225,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return count;
   }
 
+  @override
   IEnumerable<TSource> defaultIfEmpty([TSource defaultValue]) {
     Iterable<TSource> generator() sync* {
       var empty = true;
@@ -238,11 +243,9 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> distinct([IEqualityComparer<TSource> comparer]) {
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     Iterable<TSource> generator() sync* {
       var hashSet =
           HashSet(equals: comparer.equals, hashCode: comparer.getHashCode);
@@ -258,13 +261,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   TSource elementAt(int index) {
     if (index == null) {
-      throw ArgumentError.notNull("index");
+      throw ArgumentError.notNull('index');
     }
 
     if (index < 0) {
-      throw RangeError.value(index, "index");
+      throw RangeError.value(index, 'index');
     }
 
     if (this is IList<TSource>) {
@@ -283,10 +287,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     throw RangeError.range(index, 0, counter - 1);
   }
 
+  @override
   TSource elementAtOrDefault(int index) {
     TSource result;
     if (index == null) {
-      throw ArgumentError.notNull("index");
+      throw ArgumentError.notNull('index');
     }
 
     if (index < 0) {
@@ -313,16 +318,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   IEnumerable<TSource> except(IEnumerable<TSource> other,
       [IEqualityComparer<TSource> comparer]) {
     if (other == null) {
-      throw ArgumentError.notNull("other");
+      throw ArgumentError.notNull('other');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     Iterable<TSource> generator() sync* {
       var hashSet = other.toHashSet(comparer);
       var it = iterator;
@@ -337,6 +340,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   TSource first([Func1<TSource, bool> predicate]) {
     var it = iterator;
     if (predicate == null) {
@@ -355,6 +359,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     throw _errorEmptySequence();
   }
 
+  @override
   TSource firstOrDefault([Func1<TSource, bool> predicate]) {
     TSource result;
     var it = iterator;
@@ -374,11 +379,12 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   IEnumerable<IGrouping<TKey, TSource>> groupBy<TKey>(
       Func1<TSource, TKey> keySelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     IGrouping<TKey, TSource> resultSelector(
@@ -390,16 +396,17 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
         keySelector, (e) => e, resultSelector);
   }
 
+  @override
   IEnumerable<IGrouping<TKey, TElement>> groupBy$1<TKey, TElement>(
       Func1<TSource, TKey> keySelector,
       Func1<TSource, TElement> elementSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     if (elementSelector == null) {
-      throw ArgumentError.notNull("elementSelector");
+      throw ArgumentError.notNull('elementSelector');
     }
 
     IGrouping<TKey, TElement> resultSelector(
@@ -411,39 +418,38 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
         keySelector, elementSelector, resultSelector);
   }
 
+  @override
   IEnumerable<TResult> groupBy$2<TKey, TResult>(
       Func1<TSource, TKey> keySelector,
       Func2<TKey, IEnumerable<TSource>, TResult> resultSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     return groupBy$3<TKey, TSource, TResult>(
         keySelector, (e) => e, resultSelector);
   }
 
+  @override
   IEnumerable<TResult> groupBy$3<TKey, TElement, TResult>(
       Func1<TSource, TKey> keySelector,
       Func1<TSource, TElement> elementSelector,
       Func2<TKey, IEnumerable<TElement>, TResult> resultSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     if (elementSelector == null) {
-      throw ArgumentError.notNull("elementSelector");
+      throw ArgumentError.notNull('elementSelector');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     Iterable<TResult> generator() sync* {
       var map = LinkedHashMap<TKey, List<TElement>>(
           equals: comparer.equals, hashCode: comparer.getHashCode);
@@ -470,33 +476,31 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> groupJoin<TInner, TKey, TResult>(
       IEnumerable<TInner> inner,
-      TKey outerKeySelector(TSource element),
-      TKey innerKeySelector(TInner element),
-      TResult resultSelector(
-          TSource outerElement, IEnumerable<TInner> innerElements),
+      TKey Function(TSource element) outerKeySelector,
+      TKey Function(TInner element) innerKeySelector,
+      TResult Function(
+          TSource outerElement, IEnumerable<TInner> innerElements) resultSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (inner == null) {
-      throw ArgumentError.notNull("inner");
+      throw ArgumentError.notNull('inner');
     }
 
     if (innerKeySelector == null) {
-      throw ArgumentError.notNull("innerKeySelector");
+      throw ArgumentError.notNull('innerKeySelector');
     }
 
     if (outerKeySelector == null) {
-      throw ArgumentError.notNull("outerKeySelector");
+      throw ArgumentError.notNull('outerKeySelector');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     Iterable<TResult> generator() sync* {
       var dict = Dictionary<TKey, List<TInner>>(comparer);
       var it = inner.iterator;
@@ -517,10 +521,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
         var current = it2.current;
         var key = outerKeySelector(current);
         var innerValues = dict[key];
-        if (innerValues == null) {
-          innerValues = <TInner>[];
-        }
-
+        innerValues ??= <TInner>[];
         yield resultSelector(current, _Enumerable<TInner>(innerValues));
       }
     }
@@ -528,16 +529,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TSource> intersect(IEnumerable<TSource> other,
       [IEqualityComparer<TSource> comparer]) {
     if (other == null) {
-      throw ArgumentError.notNull("other");
+      throw ArgumentError.notNull('other');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     Iterable<TSource> generator() sync* {
       var second = other.toHashSet(comparer);
       var output = HashSet<TSource>(
@@ -561,32 +560,30 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TResult> join<TInner, TKey, TResult>(
       IEnumerable<TInner> inner,
-      TKey outerKeySelector(TSource outerElement),
-      TKey innerKeySelector(TInner innerElement),
-      TResult resultSelector(TSource outerElement, TInner innerElement),
+      TKey Function(TSource outerElement) outerKeySelector,
+      TKey Function(TInner innerElement) innerKeySelector,
+      TResult Function(TSource outerElement, TInner innerElement) resultSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (inner == null) {
-      throw ArgumentError.notNull("inner");
+      throw ArgumentError.notNull('inner');
     }
 
     if (innerKeySelector == null) {
-      throw ArgumentError.notNull("innerKeySelector");
+      throw ArgumentError.notNull('innerKeySelector');
     }
 
     if (outerKeySelector == null) {
-      throw ArgumentError.notNull("outerKeySelector");
+      throw ArgumentError.notNull('outerKeySelector');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     Iterable<TResult> generator() sync* {
       var innerMap = LinkedHashMap<TKey, List<TInner>>(
           equals: comparer.equals, hashCode: comparer.getHashCode);
@@ -619,6 +616,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   TSource last([Func1<TSource, bool> predicate]) {
     var it = iterator;
     var length = 0;
@@ -645,6 +643,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   TSource lastOrDefault([Func1<TSource, bool> predicate]) {
     var it = iterator;
     TSource result;
@@ -664,26 +663,31 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   TSource max() {
     return (this as IEnumerable<num>).max$1<num>((e) => e) as TSource;
   }
 
-  TResult max$1<TResult extends num>(TResult selector(TSource element)) {
+  @override
+  TResult max$1<TResult extends num>(TResult Function(TSource element) selector) {
     if (selector == null) {
-      throw ArgumentError.notNull("selector");
+      throw ArgumentError.notNull('selector');
     }
 
-    return _computeNullable<TResult>("max", (r, v) => r < v ? v : r, selector);
+    return _computeNullable<TResult>('max', (r, v) => r < v ? v : r, selector);
   }
 
+  @override
   TSource min() {
     return (this as IEnumerable<num>).min$1<num>((e) => e) as TSource;
   }
 
-  TResult min$1<TResult extends num>(TResult selector(TSource element)) {
-    return _computeNullable<TResult>("min", (r, v) => r > v ? v : r, selector);
+  @override
+  TResult min$1<TResult extends num>(TResult Function(TSource element) selector) {
+    return _computeNullable<TResult>('min', (r, v) => r > v ? v : r, selector);
   }
 
+  @override
   IEnumerable<TResult> ofType<TResult>() {
     Iterable<TResult> generator() sync* {
       var it = iterator;
@@ -698,12 +702,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IOrderedEnumerable<TSource> orderBy<TKey>(Func1<TSource, TKey> keySelector,
       [IComparer<TKey> comparer]) {
     return _OrderedEnumerable<TSource, TKey>(
         this, keySelector, comparer, false, null);
   }
 
+  @override
   IOrderedEnumerable<TSource> orderByDescending<TKey>(
       Func1<TSource, TKey> keySelector,
       [IComparer<TKey> comparer]) {
@@ -711,6 +717,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
         this, keySelector, comparer, true, null);
   }
 
+  @override
   IEnumerable<TSource> prepend(TSource element) {
     Iterable<TSource> generator() sync* {
       yield element;
@@ -723,6 +730,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> reverse() {
     Iterable<TSource> generator() sync* {
       IList<TSource> list;
@@ -741,9 +749,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TResult> select<TResult>(Func1<TSource, TResult> selector) {
     if (selector == null) {
-      throw ArgumentError.notNull("selector");
+      throw ArgumentError.notNull('selector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -756,10 +765,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> select$1<TResult>(
       Func2<TSource, int, TResult> selector) {
     if (selector == null) {
-      throw ArgumentError.notNull("selector");
+      throw ArgumentError.notNull('selector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -773,10 +783,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> selectMany<TResult>(
       Func1<TSource, IEnumerable<TResult>> selector) {
     if (selector == null) {
-      throw ArgumentError.notNull("selector");
+      throw ArgumentError.notNull('selector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -793,10 +804,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> selectMany$1<TResult>(
       Func2<TSource, int, IEnumerable<TResult>> selector) {
     if (selector == null) {
-      throw ArgumentError.notNull("selector");
+      throw ArgumentError.notNull('selector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -814,15 +826,16 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> selectMany$2<TCollection, TResult>(
       Func1<TSource, IEnumerable<TCollection>> collectionSelector,
       Func2<TSource, TCollection, TResult> resultSelector) {
     if (collectionSelector == null) {
-      throw ArgumentError.notNull("collectionSelector");
+      throw ArgumentError.notNull('collectionSelector');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -839,15 +852,16 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   IEnumerable<TResult> selectMany$3<TCollection, TResult>(
       Func2<TSource, int, IEnumerable<TCollection>> collectionSelector,
       Func2<TSource, TCollection, TResult> resultSelector) {
     if (collectionSelector == null) {
-      throw ArgumentError.notNull("collectionSelector");
+      throw ArgumentError.notNull('collectionSelector');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -865,16 +879,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TResult>(generator());
   }
 
+  @override
   bool sequenceEqual(IEnumerable<TSource> other,
       [IEqualityComparer<TSource> comparer]) {
     if (other == null) {
-      throw ArgumentError.notNull("other");
+      throw ArgumentError.notNull('other');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     if (this is IList && other is IList) {
       var list1 = this as IList;
       var list2 = other as IList;
@@ -904,6 +916,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return true;
   }
 
+  @override
   TSource single([Func1<TSource, bool> predicate]) {
     TSource result;
     var it = iterator;
@@ -938,6 +951,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   TSource singleOrDefault([Func1<TSource, bool> predicate]) {
     TSource result;
     var it = iterator;
@@ -972,9 +986,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   IEnumerable<TSource> skip(int count) {
     if (count == null) {
-      throw ArgumentError.notNull("count");
+      throw ArgumentError.notNull('count');
     }
 
     Iterable<TSource> generator() sync* {
@@ -994,9 +1009,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> skipWhile(Func1<TSource, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1017,9 +1033,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> skipWhile$1(Func2<TSource, int, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1041,17 +1058,20 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   TSource sum() {
     return (this as IEnumerable<num>).sum$1<num>((e) => e) as TSource;
   }
 
-  TResult sum$1<TResult extends num>(TResult selector(TSource element)) {
-    return _computeNullable<TResult>("sum", (r, v) => r + v, selector);
+  @override
+  TResult sum$1<TResult extends num>(TResult Function(TSource element) selector) {
+    return _computeNullable<TResult>('sum', (r, v) => r + v, selector);
   }
 
+  @override
   IEnumerable<TSource> take(int count) {
     if (count == null) {
-      throw ArgumentError.notNull("count");
+      throw ArgumentError.notNull('count');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1068,9 +1088,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> takeWhile(Func1<TSource, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1087,9 +1108,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> takeWhile$1(Func2<TSource, int, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1107,20 +1129,19 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   Collection<TSource> toCollection() {
     return Collection<TSource>(toList());
   }
 
+  @override
   Dictionary<TKey, TSource> toDictionary<TKey>(Func1<TSource, TKey> keySelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     var result = Dictionary<TKey, TSource>(comparer);
     var it = iterator;
     while (it.moveNext()) {
@@ -1132,22 +1153,20 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   Dictionary<TKey, TElement> toDictionary$1<TKey, TElement>(
       Func1<TSource, TKey> keySelector,
       Func1<TSource, TElement> elementSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     if (elementSelector == null) {
-      throw ArgumentError.notNull("elementSelector");
+      throw ArgumentError.notNull('elementSelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     var result = Dictionary<TKey, TElement>(comparer);
     var it = iterator;
     while (it.moveNext()) {
@@ -1159,35 +1178,32 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return result;
   }
 
+  @override
   HashSet<TSource> toHashSet([IEqualityComparer<TSource> comparer]) {
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     var result = HashSet<TSource>(
         equals: comparer.equals, hashCode: comparer.getHashCode);
     result.addAll(asIterable());
     return result;
   }
 
+  @override
   List<TSource> toList({bool growable = true}) {
     if (growable == null) {
-      throw ArgumentError.notNull("growable");
+      throw ArgumentError.notNull('growable');
     }
 
     return List<TSource>.from(asIterable(), growable: growable);
   }
 
+  @override
   Lookup<TKey, TSource> toLookup<TKey>(Func1<TSource, TKey> keySelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     var dict = Dictionary<TKey, IGrouping<TKey, TSource>>(comparer);
     var it = groupBy<TKey>(keySelector, comparer).iterator;
     while (it.moveNext()) {
@@ -1198,22 +1214,20 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return Lookup<TKey, TSource>._internal(dict);
   }
 
+  @override
   Lookup<TKey, TElement> toLookup$1<TKey, TElement>(
       Func1<TSource, TKey> keySelector,
       Func1<TSource, TElement> elementSelector,
       [IEqualityComparer<TKey> comparer]) {
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     if (elementSelector == null) {
-      throw ArgumentError.notNull("elementSelector");
+      throw ArgumentError.notNull('elementSelector');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TKey>();
-    }
-
+    comparer ??= EqualityComparer<TKey>();
     var dict = Dictionary<TKey, IGrouping<TKey, TElement>>(comparer);
     var it = groupBy$1<TKey, TElement>(keySelector, elementSelector, comparer)
         .iterator;
@@ -1225,16 +1239,14 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return Lookup<TKey, TElement>._internal(dict);
   }
 
+  @override
   IEnumerable<TSource> union(IEnumerable<TSource> other,
       [IEqualityComparer<TSource> comparer]) {
     if (other == null) {
-      throw ArgumentError.notNull("other");
+      throw ArgumentError.notNull('other');
     }
 
-    if (comparer == null) {
-      comparer = EqualityComparer<TSource>();
-    }
-
+    comparer ??= EqualityComparer<TSource>();
     Iterable<TSource> generator() sync* {
       var it = iterator;
       var hashSet =
@@ -1258,9 +1270,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> where(Func1<TSource, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1276,9 +1289,10 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable<TSource> where$1(Func2<TSource, int, bool> predicate) {
     if (predicate == null) {
-      throw ArgumentError.notNull("predicate");
+      throw ArgumentError.notNull('predicate');
     }
 
     Iterable<TSource> generator() sync* {
@@ -1295,14 +1309,15 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
     return _Enumerable<TSource>(generator());
   }
 
+  @override
   IEnumerable zip<TSecond, TResult>(IEnumerable<TSecond> second,
       Func2<TSource, TSecond, TResult> resultSelector) {
     if (second == null) {
-      throw ArgumentError.notNull("second");
+      throw ArgumentError.notNull('second');
     }
 
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     Iterable<TResult> generator() sync* {
@@ -1319,7 +1334,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
   TResult _computeNullable<TResult extends num>(
       String name,
       Func2<TResult, TResult, TResult> func,
-      TResult selector(TSource element)) {
+      TResult Function(TSource element) selector) {
     TResult result;
     var first = true;
     var it = iterator;
@@ -1330,10 +1345,7 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
       }
 
       var value = selector(current);
-      if (result == null) {
-        result = value;
-      }
-
+      result ??= value;
       if (value != null) {
         if (!first) {
           result = func(result, value);
@@ -1347,15 +1359,15 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
   }
 
   StateError _errorEmptySequence() {
-    return StateError("Sequence contains no elements");
+    return StateError('Sequence contains no elements');
   }
 
   StateError _errorMoreThanOneElement() {
-    return StateError("Sequence contains more than one element");
+    return StateError('Sequence contains more than one element');
   }
 
   StateError _errorUnableToCompute<TResult>(String operation) {
-    return StateError("Unable to compute '$operation' of '$TResult' values");
+    return StateError('Unable to compute \'$operation\' of \'$TResult\' values');
   }
 
   /// Returns an empty [IEnumerable]<[TResult]> that has the specified type
@@ -1388,10 +1400,11 @@ abstract class Enumerable<TSource> implements IEnumerable<TSource> {
 }
 
 class _Enumerable<T> extends Object with Enumerable<T> {
-  Iterable<T> _iterable;
+  final Iterable<T> _iterable;
 
   _Enumerable(this._iterable);
 
+  @override
   Iterator<T> get iterator {
     return _iterable.iterator;
   }

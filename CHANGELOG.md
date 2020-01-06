@@ -1,3 +1,7 @@
+## 0.1.14
+
+- The source code has been modified in accordance with Google’s guidelines about the effectiveness of the Dart language
+
 ## 0.1.12
 
 - Fixed bug in `Enumerable.groupJoin()`

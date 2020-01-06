@@ -10,10 +10,7 @@ class Collection<TElement> extends Object
   ///
   /// Exceptions:
   Collection([List<TElement> items]) {
-    if (items == null) {
-      items = <TElement>[];
-    }
-
+    items ??= <TElement>[];
     _items = items;
   }
 }
@@ -98,6 +95,7 @@ abstract class _Collection<TElement>
   List<TElement> _items;
 
   /// Returns [:true:] if collection is read only; otherwise, [:false:].
+  @override
   bool get isReadOnly {
     return false;
   }
@@ -105,18 +103,20 @@ abstract class _Collection<TElement>
   /// Returns the wrapped list of collection.
   List<TElement> get items {
     if (isReadOnly) {
-      throw UnsupportedError("items");
+      throw UnsupportedError('items');
     }
 
     return _items;
   }
 
   /// Returns iterator of collection.
+  @override
   Iterator<TElement> get iterator {
     return _items.iterator;
   }
 
   /// Returns the size of collection.
+  @override
   int get length {
     return _items.length;
   }
@@ -133,6 +133,7 @@ abstract class _Collection<TElement>
   ///
   ///  [RangeError]
   ///  [index] is out of range
+  @override
   TElement operator [](int index) {
     return _items[index];
   }
@@ -155,9 +156,10 @@ abstract class _Collection<TElement>
   ///
   ///  [RangeError]
   ///  [index] is out of range
+  @override
   void operator []=(int index, TElement item) {
     if (isReadOnly) {
-      throw UnsupportedError("items=");
+      throw UnsupportedError('items=');
     }
 
     _items[index] = item;
@@ -170,9 +172,10 @@ abstract class _Collection<TElement>
   ///  Item to add to the collection.
   ///
   /// Exeptions:
+  @override
   void add(TElement element) {
     if (isReadOnly) {
-      throw UnsupportedError("add()");
+      throw UnsupportedError('add()');
     }
 
     _items.add(element);
@@ -185,9 +188,10 @@ abstract class _Collection<TElement>
   /// Exceptions:
   ///  [UnsupportedError]
   ///  Collection is readonly.
+  @override
   void clear() {
     if (isReadOnly) {
-      throw UnsupportedError("clear()");
+      throw UnsupportedError('clear()');
     }
 
     _items.clear();
@@ -202,6 +206,7 @@ abstract class _Collection<TElement>
   /// Exceptions:
   ///  [UnsupportedError]
   ///  Collection is readonly.
+  @override
   bool containsValue(TElement item) {
     return _items.contains(item);
   }
@@ -226,19 +231,20 @@ abstract class _Collection<TElement>
   ///  [index] out of range
   ///   OR
   ///  Insufficient size of the [list]
+  @override
   void copyTo(List<TElement> list, int index) {
     if (list == null) {
-      throw ArgumentError.notNull("list");
+      throw ArgumentError.notNull('list');
     }
 
     if (index == null) {
-      throw ArgumentError.notNull("index");
+      throw ArgumentError.notNull('index');
     }
 
     var length = this.length;
     var rest = length - index;
     if (index < 0 || rest <= 0) {
-      throw RangeError("index: $index");
+      throw RangeError('index: $index');
     }
 
     var end = index + rest;
@@ -259,6 +265,7 @@ abstract class _Collection<TElement>
   ///
   /// Exceptions:
   ///  TODO: Exceptions in Dart undocumented
+  @override
   int indexOf(TElement item, [int start = 0]) {
     return _items.indexOf(item, start);
   }
@@ -277,9 +284,10 @@ abstract class _Collection<TElement>
   ///  Collection is readonly.
   ///
   ///  TODO: Exceptions in Dart undocumented
+  @override
   void insert(int index, TElement item) {
     if (isReadOnly) {
-      throw UnsupportedError("insert()");
+      throw UnsupportedError('insert()');
     }
 
     _items.insert(index, item);
@@ -295,9 +303,10 @@ abstract class _Collection<TElement>
   /// Exeptions:
   ///  [UnsupportedError]
   ///  Collection is readonly.
+  @override
   bool remove(TElement item) {
     if (isReadOnly) {
-      throw UnsupportedError("remove()");
+      throw UnsupportedError('remove()');
     }
 
     return _items.remove(item);
@@ -318,9 +327,10 @@ abstract class _Collection<TElement>
   ///
   ///  [RangeError]
   ///  [index] out of range
+  @override
   TElement removeAt(int index) {
     if (isReadOnly) {
-      throw UnsupportedError("removeAt()");
+      throw UnsupportedError('removeAt()');
     }
 
     return _items.removeAt(index);
@@ -331,6 +341,7 @@ abstract class _Collection<TElement>
   /// Parameters:
   ///
   /// Exceptions:
+  @override
   String toString() {
     return _items.toString();
   }

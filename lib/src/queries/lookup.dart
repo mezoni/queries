@@ -14,7 +14,7 @@ class Lookup<TKey, TElement> extends Object
     implements ILookup<TKey, TElement> {
   IGrouping<TKey, TElement> _current;
 
-  Dictionary<TKey, IGrouping<TKey, TElement>> _groupings;
+  final Dictionary<TKey, IGrouping<TKey, TElement>> _groupings;
 
   Lookup._internal(this._groupings);
 
@@ -22,14 +22,17 @@ class Lookup<TKey, TElement> extends Object
     return _current;
   }
 
+  @override
   Iterator<IGrouping<TKey, TElement>> get iterator {
     return _groupings.values.iterator;
   }
 
+  @override
   int get length {
     return _groupings.length;
   }
 
+  @override
   IEnumerable<TElement> operator [](TKey key) {
     var grouping = _groupings[key];
     if (grouping != null) {
@@ -40,14 +43,16 @@ class Lookup<TKey, TElement> extends Object
   }
 
   IEnumerable<TResult> applyResultSelector<TResult>(
-      TResult resultSelector(TKey key, IEnumerable<TElement> elements)) {
+      TResult Function(TKey key, IEnumerable<TElement> elements)
+          resultSelector) {
     if (resultSelector == null) {
-      throw ArgumentError.notNull("resultSelector");
+      throw ArgumentError.notNull('resultSelector');
     }
 
     return select<TResult>((g) => resultSelector(g.key, g));
   }
 
+  @override
   bool containsKey(TKey key) {
     return _groupings.containsKey(key);
   }

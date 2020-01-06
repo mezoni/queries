@@ -23,7 +23,7 @@ class _OrderedEnumerable<TElement, TSortKey> extends Object
 
   Func1<TElement, TSortKey> _keySelector;
 
-  _OrderedEnumerable<TElement, Object> _parent;
+  final _OrderedEnumerable<TElement, Object> _parent;
 
   IEnumerable<TElement> _source;
 
@@ -34,44 +34,45 @@ class _OrderedEnumerable<TElement, TSortKey> extends Object
       bool descending,
       this._parent) {
     if (source == null) {
-      throw ArgumentError.notNull("source");
+      throw ArgumentError.notNull('source');
     }
 
     if (keySelector == null) {
-      throw ArgumentError.notNull("keySelector");
+      throw ArgumentError.notNull('keySelector');
     }
 
     if (descending == null) {
-      throw ArgumentError.notNull("descending");
+      throw ArgumentError.notNull('descending');
     }
 
-    if (comparer == null) {
-      comparer = Comparer.getDefault<TSortKey>();
-    }
-
+    comparer ??= Comparer.getDefault<TSortKey>();
     _comparer = comparer;
     _descending = descending;
     _keySelector = keySelector;
     _source = source;
   }
 
+  @override
   Iterator<TElement> get iterator {
     return _orderAll().iterator;
   }
 
+  @override
   IOrderedEnumerable<TElement> createOrderedEnumerable<TKey>(
       Func1<TElement, TKey> keySelector,
       IComparer<TKey> comparer,
       bool descending) {
     return _OrderedEnumerable<TElement, TKey>(
-        this._source, keySelector, comparer, descending, this);
+        _source, keySelector, comparer, descending, this);
   }
 
+  @override
   IOrderedEnumerable<TElement> thenBy<TKey>(Func1<TElement, TKey> keySelector,
       [IComparer<TKey> comparer]) {
     return createOrderedEnumerable<TKey>(keySelector, comparer, false);
   }
 
+  @override
   IOrderedEnumerable<TElement> thenByDescending<TKey>(
       Func1<TElement, TKey> keySelector,
       [IComparer<TKey> comparer]) {
